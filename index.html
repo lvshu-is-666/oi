@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: 'Microsoft YaHei', sans-serif;
-            background-color: #f0f0f0;
+            background-color: #f5f7fa;
             margin: 0;
             padding: 0;
             color: #333;
@@ -18,13 +18,13 @@
         .status-panel {
             width: 250px;
             background-color: #fff;
-            border-radius: 8px;
+            border-radius: 10px;
             padding: 15px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             position: fixed;
-            left: 20px;
-            top: 20px;
-            height: calc(100vh - 40px);
+            left: 30px;
+            top: 30px;
+            height: calc(100vh - 60px);
             overflow-y: auto;
         }
         
@@ -33,74 +33,97 @@
             color: #2c3e50;
             border-bottom: 1px solid #eee;
             padding-bottom: 10px;
+            font-size: 18px;
         }
         
         .status-item {
-            margin: 8px 0;
+            margin: 12px 0;
             font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .status-item::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #3498db;
+            border-radius: 50%;
+            margin-right: 8px;
         }
         
         .game-area {
-            margin-left: 280px;
-            padding: 20px;
-            width: calc(100% - 280px);
+            margin-left: 300px;
+            padding: 30px;
+            width: calc(100% - 330px);
         }
         
         .header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
         }
         
         .header h1 {
             color: #2c3e50;
+            font-size: 28px;
+            margin-bottom: 10px;
         }
         
         .header p {
             color: #7f8c8d;
+            font-size: 14px;
         }
         
         .dialog {
             margin: 20px 0;
-            padding: 15px;
+            padding: 15px 20px;
             background-color: #f8f9fa;
-            border-radius: 5px;
+            border-radius: 8px;
             white-space: pre-wrap;
             line-height: 1.6;
-        }
-        
-        .dialog.slow {
-            opacity: 0;
-            transition: opacity 0.5s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            font-size: 14px;
         }
         
         .input-area {
-            margin: 10px 0;
+            margin: 20px 0;
         }
         
         .input-area input {
-            padding: 8px;
+            padding: 10px 15px;
             border: 1px solid #ddd;
             border-radius: 4px;
             width: 200px;
+            font-size: 14px;
         }
         
         .input-area button {
-            padding: 8px 15px;
+            padding: 10px 15px;
             background-color: #2ecc71;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             margin-left: 10px;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        
+        .input-area button:hover {
+            background-color: #27ae60;
         }
         
         .action-panel {
-            margin-bottom: 20px;
+            margin-bottom: 30px;
         }
         
         .action-panel h2 {
             margin-top: 0;
             color: #2c3e50;
+            font-size: 18px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
         }
         
         .action-list {
@@ -113,7 +136,7 @@
         }
         
         .action-list button {
-            padding: 8px 15px;
+            padding: 10px 15px;
             background-color: #3498db;
             color: white;
             border: none;
@@ -122,6 +145,7 @@
             transition: background-color 0.3s;
             width: 100%;
             text-align: left;
+            font-size: 14px;
         }
         
         .action-list button:hover {
@@ -152,31 +176,36 @@
             text-align: center;
             margin-top: 5px;
             color: #7f8c8d;
+            font-size: 12px;
         }
         
         .footer {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 30px;
             color: #7f8c8d;
+            font-size: 12px;
             position: fixed;
-            bottom: 20px;
-            width: calc(100% - 20px);
+            bottom: 30px;
+            width: calc(100% - 60px);
         }
         
         .game-controls {
             position: fixed;
-            right: 20px;
-            top: 20px;
+            right: 30px;
+            top: 30px;
         }
         
         .game-controls button {
-            padding: 8px 15px;
-            margin: 5px;
+            padding: 10px 15px;
+            margin: 5px 0;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             background-color: #3498db;
             color: white;
+            font-size: 14px;
+            transition: background-color 0.3s;
+            display: block;
         }
         
         .game-controls button:hover {
