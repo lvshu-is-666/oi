@@ -216,12 +216,12 @@
 <body>
     <div class="status-panel">
         <h2>角色状态</h2>
-        <div class="status-item">人品值: <span id="rpValue">0</span></div>
-        <div class="status-item">码力值: <span id="mlValue">0</span></div>
-        <div class="status-item">好感度: <span id="hgValue">0</span></div>
-        <div class="status-item">心情值: <span id="xqValue">100</span></div>
-        <div class="status-item">坚持天数: <span id="dayValue">0</span></div>
-        <div class="status-item">级别: <span id="jbValue">1</span></div>
+        <div class="status-item">人品值: <span id="rpValue">-</span></div>
+        <div class="status-item">码力值: <span id="mlValue">-</span></div>
+        <div class="status-item">好感度: <span id="hgValue">-</span></div>
+        <div class="status-item">心情值: <span id="xqValue">-</span></div>
+        <div class="status-item">坚持天数: <span id="dayValue">-</span></div>
+        <div class="status-item">级别: <span id="jbValue">-</span></div>
     </div>
     
     <div class="game-area">
@@ -363,7 +363,7 @@
         let ML = 0; // 码力值
         let HG = 0; // 好感度
         let XQ = 100; // 心情值
-        let Day = 0; // 坚持天数
+        let Day = 1; // 坚持天数
         let JB = 1; // 级别
         let name = ""; // 角色名字
         let isAuthorMode = false; // 是否是作者模式
@@ -530,15 +530,11 @@
             actionPanel.addEventListener('transitionend', () => {
                 if (!actionPanel.classList.contains('hidden')) {
                     incrementDay();
+                    checkExpulsion();
+                    checkLevelUp();
                 }
-            }, { once: true });
+            });
             
-            // 每次重新显示actionPanel时增加一天
-            actionPanel.addEventListener('transitionend', () => {
-                if (!actionPanel.classList.contains('hidden')) {
-                    incrementDay();
-                }
-            }, { once: true });
         }
         
         // 检查升级
