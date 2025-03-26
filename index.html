@@ -11,67 +11,54 @@
             margin: 0;
             padding: 0;
             color: #333;
+            display: flex;
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
+        
+        /* 固定状态面板 */
+        .status-panel {
+            width: 250px;
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            left: 20px;
+            top: 20px;
+            height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+        
+        .status-panel h2 {
+            margin-top: 0;
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .status-item {
+            margin: 8px 0;
+            font-size: 14px;
+        }
+        
+        .game-area {
+            margin-left: 280px;
             padding: 20px;
+            width: calc(100% - 280px);
         }
+        
         .header {
             text-align: center;
             margin-bottom: 20px;
         }
+        
         .header h1 {
             color: #2c3e50;
         }
+        
         .header p {
             color: #7f8c8d;
         }
-        .game-area {
-            background-color: #fff;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        .status-panel {
-            margin-bottom: 20px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-        }
-        .status-panel h2 {
-            margin-top: 0;
-            color: #2c3e50;
-        }
-        .status-item {
-            margin: 5px 0;
-        }
-        .action-panel {
-            margin-bottom: 20px;
-        }
-        .action-panel h2 {
-            margin-top: 0;
-            color: #2c3e50;
-        }
-        .action-list {
-            list-style-type: none;
-            padding: 0;
-        }
-        .action-list li {
-            margin: 10px 0;
-        }
-        .action-list button {
-            padding: 8px 15px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        .action-list button:hover {
-            background-color: #2980b9;
-        }
+        
         .dialog {
             margin: 20px 0;
             padding: 15px;
@@ -80,19 +67,23 @@
             white-space: pre-wrap;
             line-height: 1.6;
         }
+        
         .dialog.slow {
             opacity: 0;
             transition: opacity 0.5s;
         }
+        
         .input-area {
             margin: 10px 0;
         }
+        
         .input-area input {
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
             width: 200px;
         }
+        
         .input-area button {
             padding: 8px 15px;
             background-color: #2ecc71;
@@ -102,14 +93,45 @@
             cursor: pointer;
             margin-left: 10px;
         }
-        .footer {
-            text-align: center;
-            margin-top: 20px;
-            color: #7f8c8d;
+        
+        .action-panel {
+            margin-bottom: 20px;
         }
+        
+        .action-panel h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        
+        .action-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        .action-list li {
+            margin: 10px 0;
+        }
+        
+        .action-list button {
+            padding: 8px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+            text-align: left;
+        }
+        
+        .action-list button:hover {
+            background-color: #2980b9;
+        }
+        
         .hidden {
             display: none;
         }
+        
         .loading-bar {
             width: 100%;
             height: 20px;
@@ -118,46 +140,74 @@
             margin: 10px 0;
             overflow: hidden;
         }
+        
         .loading-progress {
             height: 100%;
             background-color: #3498db;
             width: 0%;
             transition: width 0.5s;
         }
+        
         .loading-text {
             text-align: center;
             margin-top: 5px;
             color: #7f8c8d;
         }
+        
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #7f8c8d;
+            position: fixed;
+            bottom: 20px;
+            width: calc(100% - 20px);
+        }
+        
+        .game-controls {
+            position: fixed;
+            right: 20px;
+            top: 20px;
+        }
+        
+        .game-controls button {
+            padding: 8px 15px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .game-controls button:hover {
+            background-color: #2980b9;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="status-panel">
+        <h2>角色状态</h2>
+        <div class="status-item">人品值: <span id="rpValue">0</span></div>
+        <div class="status-item">码力值: <span id="mlValue">0</span></div>
+        <div class="status-item">好感度: <span id="hgValue">0</span></div>
+        <div class="status-item">心情值: <span id="xqValue">100</span></div>
+        <div class="status-item">坚持天数: <span id="dayValue">0</span></div>
+        <div class="status-item">级别: <span id="jbValue">1</span></div>
+    </div>
+    
+    <div class="game-area">
         <div class="header">
             <h1>OI的成长之路</h1>
             <p>制作者：王平(绿树公司)</p>
         </div>
         
-        <div id="loadingScreen" class="game-area">
-            <div class="loading-bar">
-                <div class="loading-progress"></div>
-            </div>
-            <div class="loading-text">正在加载游戏...</div>
+        <div id="loadingScreen" class="loading-bar">
+            <div class="loading-progress"></div>
         </div>
         
-        <div id="gameContent" class="game-area hidden">
-            <div id="statusPanel" class="status-panel">
-                <h2>角色状态</h2>
-                <div id="statusContent">
-                    <div class="status-item">人品值: <span id="rpValue">0</span></div>
-                    <div class="status-item">码力值: <span id="mlValue">0</span></div>
-                    <div class="status-item">好感度: <span id="hgValue">0</span></div>
-                    <div class="status-item">心情值: <span id="xqValue">100</span></div>
-                    <div class="status-item">坚持天数: <span id="dayValue">0</span></div>
-                    <div class="status-item">级别: <span id="jbValue">1</span></div>
-                </div>
-            </div>
-            
+        <div class="loading-text">正在加载游戏...</div>
+        
+        <div id="gameContent" class="hidden">
             <div id="dialogBox" class="dialog"></div>
             
             <div class="input-area" id="nameInputArea">
@@ -167,14 +217,6 @@
             
             <div id="actionPanel" class="action-panel hidden">
                 <h2>今日行动</h2>
-                <ul class="action-list">
-                    <li><button onclick="viewStatus()">1. 查看面板</button></li>
-                    <li><button onclick="startDay()">2. 开始一天的生活</button></li>
-                </ul>
-            </div>
-            
-            <div id="dailyActions" class="action-panel hidden">
-                <h2>你要做什么？</h2>
                 <ul class="action-list">
                     <li><button onclick="goToSchool()">1. 去师大附中</button></li>
                     <li><button onclick="参加模拟赛()">2. 参加模拟赛</button></li>
@@ -272,10 +314,18 @@
                 </ul>
             </div>
         </div>
-        
-        <div class="footer">
-            <p>© 2023 OI的成长之路 - 绿树公司</p>
-        </div>
+    </div>
+
+    <div class="footer">
+        <p>© 2023 OI的成长之路 - 绿树公司</p>
+    </div>
+    
+    <div class="game-controls">
+        <button onclick="saveGame()">保存游戏</button>
+        <button onclick="loadGame()">加载游戏</button>
+        <button onclick="exportGame()">导出游戏</button>
+        <button onclick="importGame()">导入游戏</button>
+        <button onclick="resetGame()">重开游戏</button>
     </div>
 
     <script>
@@ -292,11 +342,9 @@
         // DOM元素
         let loadingScreen = document.getElementById('loadingScreen');
         let gameContent = document.getElementById('gameContent');
-        let statusPanel = document.getElementById('statusPanel');
         let dialogBox = document.getElementById('dialogBox');
         let nameInputArea = document.getElementById('nameInputArea');
         let actionPanel = document.getElementById('actionPanel');
-        let dailyActions = document.getElementById('dailyActions');
         let schoolActions = document.getElementById('schoolActions');
         let distractionOptions = document.getElementById('distractionOptions');
         let afterExamOptions = document.getElementById('afterExamOptions');
@@ -319,6 +367,7 @@
                 if (loadingPercent >= 100) {
                     clearInterval(loadingInterval);
                     loadingProgress.style.width = '100%';
+                    loadingText.textContent = '加载完成';
                     setTimeout(() => {
                         loadingScreen.classList.add('hidden');
                         gameContent.classList.remove('hidden');
@@ -373,7 +422,8 @@
                         let intro = `自我介绍：我叫${name}，是一名蒟蒻，但我有一个理想——当一个大神犇！`;
                         showDialog(intro);
                         setTimeout(() => {
-                            viewStatus();
+                            // 开始游戏主循环
+                            gameLoop();
                         }, 3000);
                     }, 1000);
                 }, 1000);
@@ -421,7 +471,6 @@
                     updateStatus();
                     nameInputArea.style.display = 'block';
                     actionPanel.classList.add('hidden');
-                    dailyActions.classList.add('hidden');
                     schoolActions.classList.add('hidden');
                     distractionOptions.classList.add('hidden');
                     afterExamOptions.classList.add('hidden');
@@ -435,44 +484,22 @@
             }
         }
         
-        // 查看面板
-        function viewStatus() {
-            updateStatus();
-            statusPanel.style.display = 'block';
-            dailyActions.classList.add('hidden');
-            schoolActions.classList.add('hidden');
-            distractionOptions.classList.add('hidden');
-            afterExamOptions.classList.add('hidden');
-            problemSolvingOptions.classList.add('hidden');
-            webOptions.classList.add('hidden');
-            trainingConfirmation.classList.add('hidden');
-            examOptions.classList.add('hidden');
-            last30Minutes.classList.add('hidden');
-            apologizeOptions.classList.add('hidden');
-        }
-        
-        // 开始一天的生活
-        function startDay() {
-            Day++;
-            checkLevelUp();
-            updateStatus();
-            
-            let dayMessage = `第${Day}天开始了！`;
-            showDialog(dayMessage);
-            
-            setTimeout(() => {
-                statusPanel.style.display = 'none';
-                dailyActions.classList.remove('hidden');
-                schoolActions.classList.add('hidden');
-                distractionOptions.classList.add('hidden');
-                afterExamOptions.classList.add('hidden');
-                problemSolvingOptions.classList.add('hidden');
-                webOptions.classList.add('hidden');
-                trainingConfirmation.classList.add('hidden');
-                examOptions.classList.add('hidden');
-                last30Minutes.classList.add('hidden');
-                apologizeOptions.classList.add('hidden');
-            }, 2000);
+        // 游戏主循环
+        function gameLoop() {
+            // 每个游戏日自动增加天数
+            setInterval(() => {
+                Day++;
+                checkLevelUp();
+                updateStatus();
+                checkExpulsion();
+                
+                let dayMessage = `第${Day}天开始了！`;
+                showDialog(dayMessage);
+                
+                setTimeout(() => {
+                    actionPanel.classList.remove('hidden');
+                }, 2000);
+            }, 86400000); // 每天增加一次（86400000毫秒 = 24小时）
         }
         
         // 检查升级
@@ -506,18 +533,18 @@
         
         // 去师大附中
         function goToSchool() {
-            dailyActions.classList.add('hidden');
+            actionPanel.classList.add('hidden');
             schoolActions.classList.remove('hidden');
         }
         
         // 参加模拟赛
         function 参加模拟赛() {
-            dailyActions.classList.add('hidden');
+            actionPanel.classList.add('hidden');
             let random = Math.floor(Math.random() * 3) + 1;
             if (random === 1) {
                 showDialog("今日没有模拟赛..");
                 setTimeout(() => {
-                    dailyActions.classList.remove('hidden');
+                    actionPanel.classList.remove('hidden');
                 }, 2000);
             } else {
                 showDialog("今天的模拟赛好简单啊！so easy!");
@@ -533,11 +560,11 @@
         
         // 去集训
         function goToTraining() {
-            dailyActions.classList.add('hidden');
+            actionPanel.classList.add('hidden');
             if (Day % 30 !== 10) {
                 showDialog("最近无集训");
                 setTimeout(() => {
-                    dailyActions.classList.remove('hidden');
+                    actionPanel.classList.remove('hidden');
                 }, 2000);
             } else {
                 let jxt = Math.floor(Math.random() * 48) + 3;
@@ -550,16 +577,16 @@
         
         // 参加NOIP比赛
         function 参加NOIP() {
-            dailyActions.classList.add('hidden');
+            actionPanel.classList.add('hidden');
             if (Day % 3 !== 2) {
                 showDialog("今日没有NOIP比赛");
                 setTimeout(() => {
-                    dailyActions.classList.remove('hidden');
+                    actionPanel.classList.remove('hidden');
                 }, 2000);
             } else if (ML <= 60) {
                 showDialog("码力值不足....");
                 setTimeout(() => {
-                    dailyActions.classList.remove('hidden');
+                    actionPanel.classList.remove('hidden');
                 }, 2000);
             } else {
                 showDialog("正在前往NOIP考场...");
@@ -575,16 +602,16 @@
         
         // 参加NOI比赛
         function 参加NOI() {
-            dailyActions.classList.add('hidden');
+            actionPanel.classList.add('hidden');
             if (Day % 5 !== 2) {
                 showDialog("今日没有NOI比赛");
                 setTimeout(() => {
-                    dailyActions.classList.remove('hidden');
+                    actionPanel.classList.remove('hidden');
                 }, 2000);
             } else if (ML <= 150) {
                 showDialog("码力值不足....");
                 setTimeout(() => {
-                    dailyActions.classList.remove('hidden');
+                    actionPanel.classList.remove('hidden');
                 }, 2000);
             } else {
                 showDialog("正在前往NOI考场...");
@@ -626,7 +653,7 @@
                             
                             updateStatus();
                             setTimeout(() => {
-                                dailyActions.classList.remove('hidden');
+                                actionPanel.classList.remove('hidden');
                             }, 3000);
                         }, 3000);
                     }, 2000);
@@ -636,16 +663,16 @@
         
         // 参加IOI比赛
         function 参加IOI() {
-            dailyActions.classList.add('hidden');
+            actionPanel.classList.add('hidden');
             if (Day % 10 !== 4) {
                 showDialog("今日没有IOI比赛");
                 setTimeout(() => {
-                    dailyActions.classList.remove('hidden');
+                    actionPanel.classList.remove('hidden');
                 }, 2000);
             } else if (ML <= 300) {
                 showDialog("码力值不足....");
                 setTimeout(() => {
-                    dailyActions.classList.remove('hidden');
+                    actionPanel.classList.remove('hidden');
                 }, 2000);
             } else {
                 showDialog("正在前往IOI考场...");
@@ -717,7 +744,7 @@
                             
                             updateStatus();
                             setTimeout(() => {
-                                dailyActions.classList.remove('hidden');
+                                actionPanel.classList.remove('hidden');
                             }, 3000);
                         }, 3000);
                     }, 2000);
@@ -727,20 +754,20 @@
         
         // 在家颓废
         function stayHome() {
-            dailyActions.classList.add('hidden');
+            actionPanel.classList.add('hidden');
             showDialog("在家颓废了一天，码力值-10，心情+10，人品值-10");
             ML -= 10;
             XQ += 10;
             RP -= 10;
             updateStatus();
             setTimeout(() => {
-                dailyActions.classList.remove('hidden');
+                actionPanel.classList.remove('hidden');
             }, 3000);
         }
         
         // 打开网页
         function openWeb() {
-            dailyActions.classList.add('hidden');
+            actionPanel.classList.add('hidden');
             showDialog("即将为你打开网页...");
             setTimeout(() => {
                 webOptions.classList.remove('hidden');
@@ -765,7 +792,7 @@
                 // window.open(urls[siteId-1], '_blank');
                 setTimeout(() => {
                     webOptions.classList.add('hidden');
-                    dailyActions.classList.remove('hidden');
+                    actionPanel.classList.remove('hidden');
                 }, 2000);
             }
         }
@@ -784,7 +811,6 @@
                 updateStatus();
                 nameInputArea.style.display = 'block';
                 actionPanel.classList.add('hidden');
-                dailyActions.classList.add('hidden');
                 schoolActions.classList.add('hidden');
                 distractionOptions.classList.add('hidden');
                 afterExamOptions.classList.add('hidden');
@@ -807,7 +833,7 @@
             XQ -= 2;
             updateStatus();
             setTimeout(() => {
-                dailyActions.classList.remove('hidden');
+                actionPanel.classList.remove('hidden');
             }, 3000);
         }
         
@@ -837,7 +863,7 @@
             }
             updateStatus();
             setTimeout(() => {
-                dailyActions.classList.remove('hidden');
+                actionPanel.classList.remove('hidden');
             }, 3000);
         }
         
@@ -860,7 +886,7 @@
             }
             updateStatus();
             setTimeout(() => {
-                dailyActions.classList.remove('hidden');
+                actionPanel.classList.remove('hidden');
             }, 3000);
         }
         
@@ -883,7 +909,7 @@
             }
             updateStatus();
             setTimeout(() => {
-                dailyActions.classList.remove('hidden');
+                actionPanel.classList.remove('hidden');
             }, 3000);
         }
         
@@ -916,7 +942,7 @@
             }
             updateStatus();
             setTimeout(() => {
-                dailyActions.classList.remove('hidden');
+                actionPanel.classList.remove('hidden');
             }, 3000);
         }
         
@@ -937,7 +963,7 @@
                 XQ += 5;
                 updateStatus();
                 setTimeout(() => {
-                    dailyActions.classList.remove('hidden');
+                    actionPanel.classList.remove('hidden');
                 }, 3000);
             }
         }
@@ -958,7 +984,7 @@
             }
             updateStatus();
             setTimeout(() => {
-                dailyActions.classList.remove('hidden');
+                actionPanel.classList.remove('hidden');
             }, 3000);
         }
         
@@ -978,7 +1004,7 @@
             }
             updateStatus();
             setTimeout(() => {
-                dailyActions.classList.remove('hidden');
+                actionPanel.classList.remove('hidden');
             }, 3000);
         }
         
@@ -999,7 +1025,7 @@
             }
             updateStatus();
             setTimeout(() => {
-                dailyActions.classList.remove('hidden');
+                actionPanel.classList.remove('hidden');
             }, 3000);
         }
         
@@ -1013,7 +1039,7 @@
             XQ += 5;
             updateStatus();
             setTimeout(() => {
-                dailyActions.classList.remove('hidden');
+                actionPanel.classList.remove('hidden');
             }, 3000);
         }
         
@@ -1029,14 +1055,14 @@
             showDialog(`集训完成，你感觉自己更NB了。`);
             updateStatus();
             setTimeout(() => {
-                dailyActions.classList.remove('hidden');
+                actionPanel.classList.remove('hidden');
             }, 3000);
         }
         
         // 取消集训
         function cancelTraining() {
             trainingConfirmation.classList.add('hidden');
-            dailyActions.classList.remove('hidden');
+            actionPanel.classList.remove('hidden');
         }
         
         // 选择题目
@@ -1093,7 +1119,7 @@
                 }
             }
             setTimeout(() => {
-                dailyActions.classList.remove('hidden');
+                actionPanel.classList.remove('hidden');
             }, 5000);
         }
         
@@ -1104,7 +1130,7 @@
             if (ML >= 600) random += 10;
             showDialog(`你得了${random}分`);
             setTimeout(() => {
-                dailyActions.classList.remove('hidden');
+                actionPanel.classList.remove('hidden');
             }, 2000);
         }
         
@@ -1122,13 +1148,13 @@
             }
             updateStatus();
             setTimeout(() => {
-                dailyActions.classList.remove('hidden');
+                actionPanel.classList.remove('hidden');
             }, 3000);
         }
         
         function doNothing() {
             last30Minutes.classList.add('hidden');
-            dailyActions.classList.remove('hidden');
+            actionPanel.classList.remove('hidden');
         }
         
         // 迟到后选择
@@ -1140,7 +1166,7 @@
             XQ += 5;
             updateStatus();
             setTimeout(() => {
-                dailyActions.classList.remove('hidden');
+                actionPanel.classList.remove('hidden');
             }, 3000);
         }
         
@@ -1160,7 +1186,7 @@
             }
             updateStatus();
             setTimeout(() => {
-                dailyActions.classList.remove('hidden');
+                actionPanel.classList.remove('hidden');
             }, 3000);
         }
         
@@ -1186,7 +1212,7 @@
                                             setTimeout(() => {
                                                 showDialog("没问题...");
                                                 setTimeout(() => {
-                                                    showDialog("啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊！！！");
+                                                    showDialog("啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊！！！");
                                                     setTimeout(() => {
                                                         showDialog("你不得不学着面对这样一个事实：");
                                                         setTimeout(() => {
@@ -1209,7 +1235,7 @@
                                                                     XQ -= 10;
                                                                     updateStatus();
                                                                     setTimeout(() => {
-                                                                        dailyActions.classList.remove('hidden');
+                                                                        actionPanel.classList.remove('hidden');
                                                                     }, 3000);
                                                                 }, 7000);
                                                             }, 2000);
@@ -1225,6 +1251,123 @@
                     }, 2000);
                 }, 2000);
             }, 2000);
+        }
+        
+        // 保存游戏
+        function saveGame() {
+            let saveData = {
+                RP: RP,
+                ML: ML,
+                HG: HG,
+                XQ: XQ,
+                Day: Day,
+                JB: JB,
+                name: name
+            };
+            
+            localStorage.setItem('oiGameSave', JSON.stringify(saveData));
+            showDialog("游戏已保存！");
+        }
+        
+        // 加载游戏
+        function loadGame() {
+            let saveData = localStorage.getItem('oiGameSave');
+            if (saveData) {
+                saveData = JSON.parse(saveData);
+                RP = saveData.RP;
+                ML = saveData.ML;
+                HG = saveData.HG;
+                XQ = saveData.XQ;
+                Day = saveData.Day;
+                JB = saveData.JB;
+                name = saveData.name;
+                updateStatus();
+                showDialog("游戏加载成功！");
+            } else {
+                showDialog("没有找到存档！");
+            }
+        }
+        
+        // 导出游戏
+        function exportGame() {
+            let saveData = {
+                RP: RP,
+                ML: ML,
+                HG: HG,
+                XQ: XQ,
+                Day: Day,
+                JB: JB,
+                name: name
+            };
+            
+            let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(saveData));
+            let downloadAnchor = document.createElement("a");
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "oi_game_save.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            document.body.removeChild(downloadAnchor);
+            showDialog("游戏已导出为 oi_game_save.json 文件！");
+        }
+        
+        // 导入游戏
+        function importGame() {
+            let input = document.createElement("input");
+            input.type = "file";
+            input.accept = ".json";
+            input.onchange = function(e) {
+                let file = e.target.files[0];
+                if (file) {
+                    let reader = new FileReader();
+                    reader.onload = function(event) {
+                        try {
+                            let saveData = JSON.parse(event.target.result);
+                            RP = saveData.RP || 0;
+                            ML = saveData.ML || 0;
+                            HG = saveData.HG || 0;
+                            XQ = saveData.XQ || 100;
+                            Day = saveData.Day || 0;
+                            JB = saveData.JB || 1;
+                            name = saveData.name || "";
+                            updateStatus();
+                            showDialog("游戏导入成功！");
+                        } catch (e) {
+                            showDialog("导入失败，文件格式不正确！");
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            document.body.appendChild(input);
+            input.click();
+            document.body.removeChild(input);
+        }
+        
+        // 重开游戏
+        function resetGame() {
+            if (confirm("确定要重开游戏吗？这将重置所有进度！")) {
+                RP = 0;
+                ML = 0;
+                HG = 0;
+                XQ = 100;
+                Day = 0;
+                JB = 1;
+                name = "";
+                localStorage.removeItem('oiGameSave');
+                updateStatus();
+                showDialog("游戏已重开！");
+                nameInputArea.style.display = 'block';
+                actionPanel.classList.add('hidden');
+                schoolActions.classList.add('hidden');
+                distractionOptions.classList.add('hidden');
+                afterExamOptions.classList.add('hidden');
+                problemSolvingOptions.classList.add('hidden');
+                webOptions.classList.add('hidden');
+                trainingConfirmation.classList.add('hidden');
+                examOptions.classList.add('hidden');
+                last30Minutes.classList.add('hidden');
+                apologizeOptions.classList.add('hidden');
+            }
         }
     </script>
 </body>
