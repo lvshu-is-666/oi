@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OI的成长之路 - 绿树公司</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            color: #2c3e50;
+        }
+        .header p {
+            color: #7f8c8d;
+        }
+        .game-area {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .status-panel {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .status-panel h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .status-item {
+            margin: 5px 0;
+        }
+        .action-panel {
+            margin-bottom: 20px;
+        }
+        .action-panel h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .action-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .action-list li {
+            margin: 10px 0;
+        }
+        .action-list button {
+            padding: 8px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .action-list button:hover {
+            background-color: #2980b9;
+        }
+        .dialog {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+        .dialog.slow {
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        .input-area {
+            margin: 10px 0;
+        }
+        .input-area input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 200px;
+        }
+        .input-area button {
+            padding: 8px 15px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #7f8c8d;
+        }
+        .hidden {
+            display: none;
+        }
+        .loading-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #ecf0f1;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .loading-progress {
+            height: 100%;
+            background-color: #3498db;
+            width: 0%;
+            transition: width 0.5s;
+        }
+        .loading-text {
+            text-align: center;
+            margin-top: 5px;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>OI的成长之路</h1>
+            <p>制作者：王平(绿树公司)</p>
+        </div>
+        
+        <div id="loadingScreen" class="game-area">
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+            <div class="loading-text">正在加载游戏...</div>
+        </div>
+        
+        <div id="gameContent" class="game-area hidden">
+            <div id="statusPanel" class="status-panel">
+                <h2>角色状态</h2>
+                <div id="statusContent">
+                    <div class="status-item">人品值: <span id="rpValue">0</span></div>
+                    <div class="status-item">码力值: <span id="mlValue">0</span></div>
+                    <div class="status-item">好感度: <span id="hgValue">0</span></div>
+                    <div class="status-item">心情值: <span id="xqValue">100</span></div>
+                    <div class="status-item">坚持天数: <span id="dayValue">0</span></div>
+                    <div class="status-item">级别: <span id="jbValue">1</span></div>
+                </div>
+            </div>
+            
+            <div id="dialogBox" class="dialog"></div>
+            
+            <div class="input-area" id="nameInputArea">
+                <input type="text" id="playerName" placeholder="请输入你的名字">
+                <button onclick="confirmName()">确定</button>
+            </div>
+            
+            <div id="actionPanel" class="action-panel hidden">
+                <h2>今日行动</h2>
+                <ul class="action-list">
+                    <li><button onclick="viewStatus()">1. 查看面板</button></li>
+                    <li><button onclick="startDay()">2. 开始一天的生活</button></li>
+                </ul>
+            </div>
+            
+            <div id="dailyActions" class="action-panel hidden">
+                <h2>你要做什么？</h2>
+                <ul class="action-list">
+                    <li><button onclick="goToSchool()">1. 去师大附中</button></li>
+                    <li><button onclick="参加模拟赛()">2. 参加模拟赛</button></li>
+                    <li><button onclick="goToTraining()">3. 去集训</button></li>
+                    <li><button onclick="参加NOIP()">4. 去参加NOIP比赛</button></li>
+                    <li><button onclick="参加NOI()">5. 去参加NOI比赛</button></li>
+                    <li><button onclick="参加IOI()">6. 参加IOI比赛</button></li>
+                    <li><button onclick="stayHome()">7. 在家里颓废</button></li>
+                    <li><button onclick="openWeb()">8. 打开网页浏览</button></li>
+                    <li><button onclick="exitGame()">9. 退出游戏</button></li>
+                </ul>
+            </div>
+            
+            <div id="schoolActions" class="action-panel hidden">
+                <h2>在学校</h2>
+                <ul class="action-list">
+                    <li><button onclick="attendClass()">认真听讲</button></li>
+                    <li><button onclick="distractClass()">不认真听讲</button></li>
+                </ul>
+            </div>
+            
+            <div id="distractionOptions" class="action-panel hidden">
+                <h2>你要做什么？</h2>
+                <ul class="action-list">
+                    <li><button onclick="readNovel()">看小说</button></li>
+                    <li><button onclick="watchVideo()">看视频</button></li>
+                    <li><button onclick="playGame()">打游戏</button></li>
+                    <li><button onclick="writeGame()">写游戏</button></li>
+                </ul>
+            </div>
+            
+            <div id="afterExamOptions" class="action-panel hidden">
+                <h2>你要做什么？</h2>
+                <ul class="action-list">
+                    <li><button onclick="brushQuestions()">刷题</button></li>
+                    <li><button onclick="takeANap()">睡觉</button></li>
+                    <li><button onclick="playGameAfterExam()">打游戏</button></li>
+                </ul>
+            </div>
+            
+            <div id="problemSolvingOptions" class="action-panel hidden">
+                <h2>遇到难题</h2>
+                <ul class="action-list">
+                    <li><button onclick="searchOnline()">在网上找代码</button></li>
+                    <li><button onclick="thinkByYourself()">自己思考</button></li>
+                </ul>
+            </div>
+            
+            <div id="webOptions" class="action-panel hidden">
+                <h2>打开网页</h2>
+                <ul class="action-list">
+                    <li><button onclick="openWebsite(1)">1. 百度</button></li>
+                    <li><button onclick="openWebsite(2)">2. ACCoders</button></li>
+                    <li><button onclick="openWebsite(3)">3. DBSDFZOJ</button></li>
+                    <li><button onclick="openWebsite(4)">4. 东师附中OI</button></li>
+                    <li><button onclick="openWebsite(5)">5. 4399小游戏</button></li>
+                    <li><button onclick="openWebsite(6)">6. 洛谷</button></li>
+                    <li><button onclick="openWebsite(7)">7. 百度翻译</button></li>
+                    <li><button onclick="openWebsite(8)">8. 东师附中 OJ</button></li>
+                </ul>
+            </div>
+            
+            <div id="trainingConfirmation" class="action-panel hidden">
+                <h2>集训报名</h2>
+                <ul class="action-list">
+                    <li><button onclick="joinTraining()">1. 报名</button></li>
+                    <li><button onclick="cancelTraining()">2. 不报名</button></li>
+                </ul>
+            </div>
+            
+            <div id="examOptions" class="action-panel hidden">
+                <h2>考试选项</h2>
+                <ul class="action-list">
+                    <li><button onclick="chooseProblem(1)">做第一题</button></li>
+                    <li><button onclick="chooseProblem(2)">做第二题</button></li>
+                    <li><button onclick="chooseProblem(3)">做第三题</button></li>
+                    <li><button onclick="chooseProblem(4)">做第四题</button></li>
+                </ul>
+            </div>
+            
+            <div id="last30Minutes" class="action-panel hidden">
+                <h2>还剩30分钟</h2>
+                <ul class="action-list">
+                    <li><button onclick="submitSample()">输出样例数据</button></li>
+                    <li><button onclick="playGameLast()">打游戏</button></li>
+                    <li><button onclick="doNothing()">干坐着</button></li>
+                </ul>
+            </div>
+            
+            <div id="apologizeOptions" class="action-panel hidden">
+                <h2>你要做什么？</h2>
+                <ul class="action-list">
+                    <li><button onclick="apologize()">向老师认错</button></li>
+                    <li><button onclick="escapeClass()">逃进教室</button></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>© 2023 OI的成长之路 - 绿树公司</p>
+        </div>
+    </div>
+
+    <script>
+        // 游戏变量
+        let RP = 0; // 人品值
+        let ML = 0; // 码力值
+        let HG = 0; // 好感度
+        let XQ = 100; // 心情值
+        let Day = 0; // 坚持天数
+        let JB = 1; // 级别
+        let name = ""; // 角色名字
+        let isAuthorMode = false; // 是否是作者模式
+        
+        // DOM元素
+        let loadingScreen = document.getElementById('loadingScreen');
+        let gameContent = document.getElementById('gameContent');
+        let statusPanel = document.getElementById('statusPanel');
+        let dialogBox = document.getElementById('dialogBox');
+        let nameInputArea = document.getElementById('nameInputArea');
+        let actionPanel = document.getElementById('actionPanel');
+        let dailyActions = document.getElementById('dailyActions');
+        let schoolActions = document.getElementById('schoolActions');
+        let distractionOptions = document.getElementById('distractionOptions');
+        let afterExamOptions = document.getElementById('afterExamOptions');
+        let problemSolvingOptions = document.getElementById('problemSolvingOptions');
+        let webOptions = document.getElementById('webOptions');
+        let trainingConfirmation = document.getElementById('trainingConfirmation');
+        let examOptions = document.getElementById('examOptions');
+        let last30Minutes = document.getElementById('last30Minutes');
+        let apologizeOptions = document.getElementById('apologizeOptions');
+        
+        // 加载动画
+        let loadingInterval;
+        let loadingProgress = document.querySelector('.loading-progress');
+        let loadingText = document.querySelector('.loading-text');
+        let loadingPercent = 0;
+        
+        function startLoading() {
+            loadingInterval = setInterval(() => {
+                loadingPercent += 5;
+                if (loadingPercent >= 100) {
+                    clearInterval(loadingInterval);
+                    loadingProgress.style.width = '100%';
+                    setTimeout(() => {
+                        loadingScreen.classList.add('hidden');
+                        gameContent.classList.remove('hidden');
+                        startGame();
+                    }, 1000);
+                } else {
+                    loadingProgress.style.width = loadingPercent + '%';
+                    loadingText.textContent = `正在加载 ${loadingPercent}%`;
+                }
+            }, 100);
+        }
+        
+        window.onload = startLoading;
+        
+        // 开始游戏
+        function startGame() {
+            showDialog("欢迎来到OI的成长之路\n制作者：王平(绿树公司)");
+            nameInputArea.style.display = 'block';
+            document.getElementById('playerName').focus();
+        }
+        
+        // 确定名字
+        function confirmName() {
+            name = document.getElementById('playerName').value.trim();
+            if (name) {
+                nameInputArea.style.display = 'none';
+                actionPanel.classList.remove('hidden');
+                showDialog("人物生成中......");
+                
+                // 模拟加载
+                setTimeout(() => {
+                    showDialog("给你的人物起个名字吧！");
+                    setTimeout(() => {
+                        if (isAuthorMode) {
+                            showDialog("已开启作者作弊模式！");
+                            // 作者模式奖励
+                            RP += 1000;
+                            ML += 1000;
+                            HG += 1000;
+                        } else {
+                            // 计算人品值
+                            for (let i = 0; i < name.length; i++) {
+                                RP += name.charCodeAt(i);
+                                RP %= 100;
+                            }
+                            ML += 3;
+                        }
+                        
+                        RP = Math.abs(RP);
+                        updateStatus();
+                        
+                        let intro = `自我介绍：我叫${name}，是一名蒟蒻，但我有一个理想——当一个大神犇！`;
+                        showDialog(intro);
+                        setTimeout(() => {
+                            viewStatus();
+                        }, 3000);
+                    }, 1000);
+                }, 1000);
+            } else {
+                showDialog("请输入一个名字！");
+            }
+        }
+        
+        // 更新状态面板
+        function updateStatus() {
+            document.getElementById('rpValue').textContent = RP;
+            document.getElementById('mlValue').textContent = ML;
+            document.getElementById('hgValue').textContent = HG;
+            document.getElementById('xqValue').textContent = XQ;
+            document.getElementById('dayValue').textContent = Day;
+            document.getElementById('jbValue').textContent = JB;
+        }
+        
+        // 显示对话
+        function showDialog(text, isSlow = false) {
+            dialogBox.textContent = text;
+            dialogBox.className = "dialog";
+            
+            if (isSlow) {
+                dialogBox.classList.add('slow');
+                setTimeout(() => {
+                    dialogBox.classList.remove('slow');
+                }, text.length * 50);
+            }
+        }
+        
+        // 检查是否被清退
+        function checkExpulsion() {
+            if (RP < 0 || ML < 0 || HG < -30) {
+                showDialog("你因人品和码力值太低或好感度太低，被friendi清退！！");
+                setTimeout(() => {
+                    // 重置游戏
+                    RP = 0;
+                    ML = 0;
+                    HG = 0;
+                    XQ = 100;
+                    Day = 0;
+                    JB = 1;
+                    name = "";
+                    updateStatus();
+                    nameInputArea.style.display = 'block';
+                    actionPanel.classList.add('hidden');
+                    dailyActions.classList.add('hidden');
+                    schoolActions.classList.add('hidden');
+                    distractionOptions.classList.add('hidden');
+                    afterExamOptions.classList.add('hidden');
+                    problemSolvingOptions.classList.add('hidden');
+                    webOptions.classList.add('hidden');
+                    trainingConfirmation.classList.add('hidden');
+                    examOptions.classList.add('hidden');
+                    last30Minutes.classList.add('hidden');
+                    apologizeOptions.classList.add('hidden');
+                }, 3000);
+            }
+        }
+        
+        // 查看面板
+        function viewStatus() {
+            updateStatus();
+            statusPanel.style.display = 'block';
+            dailyActions.classList.add('hidden');
+            schoolActions.classList.add('hidden');
+            distractionOptions.classList.add('hidden');
+            afterExamOptions.classList.add('hidden');
+            problemSolvingOptions.classList.add('hidden');
+            webOptions.classList.add('hidden');
+            trainingConfirmation.classList.add('hidden');
+            examOptions.classList.add('hidden');
+            last30Minutes.classList.add('hidden');
+            apologizeOptions.classList.add('hidden');
+        }
+        
+        // 开始一天的生活
+        function startDay() {
+            Day++;
+            checkLevelUp();
+            updateStatus();
+            
+            let dayMessage = `第${Day}天开始了！`;
+            showDialog(dayMessage);
+            
+            setTimeout(() => {
+                statusPanel.style.display = 'none';
+                dailyActions.classList.remove('hidden');
+                schoolActions.classList.add('hidden');
+                distractionOptions.classList.add('hidden');
+                afterExamOptions.classList.add('hidden');
+                problemSolvingOptions.classList.add('hidden');
+                webOptions.classList.add('hidden');
+                trainingConfirmation.classList.add('hidden');
+                examOptions.classList.add('hidden');
+                last30Minutes.classList.add('hidden');
+                apologizeOptions.classList.add('hidden');
+            }, 2000);
+        }
+        
+        // 检查升级
+        function checkLevelUp() {
+            let levelDays = [10, 30, 60, 100, 150, 200, 300, 365, 400, 500];
+            for (let i = 0; i < levelDays.length; i++) {
+                if (Day === levelDays[i]) {
+                    JB++;
+                    let levelMessage = `恭喜你在OI的道路上坚持了${levelDays[i]}天，级别+1！`;
+                    showDialog(levelMessage);
+                    setTimeout(updateStatus, 2000);
+                    if (i === levelDays.length - 1 && Day === 365) {
+                        // 一年奖励
+                        RP += 10;
+                        ML += 10;
+                        XQ += 10;
+                        HG += 10;
+                        updateStatus();
+                    }
+                    break;
+                }
+            }
+            
+            if (Day >= 500 && Day % 150 === 0) {
+                JB++;
+                let levelMessage = `恭喜你在OI的道路上坚持了${Day}天，级别+1！`;
+                showDialog(levelMessage);
+                setTimeout(updateStatus, 2000);
+            }
+        }
+        
+        // 去师大附中
+        function goToSchool() {
+            dailyActions.classList.add('hidden');
+            schoolActions.classList.remove('hidden');
+        }
+        
+        // 参加模拟赛
+        function 参加模拟赛() {
+            dailyActions.classList.add('hidden');
+            let random = Math.floor(Math.random() * 3) + 1;
+            if (random === 1) {
+                showDialog("今日没有模拟赛..");
+                setTimeout(() => {
+                    dailyActions.classList.remove('hidden');
+                }, 2000);
+            } else {
+                showDialog("今天的模拟赛好简单啊！so easy!");
+                setTimeout(() => {
+                    showDialog("你用了一半的时间就答完了题，AK!!");
+                    setTimeout(() => {
+                        showDialog("你想在剩下的一半时间做什么？");
+                        afterExamOptions.classList.remove('hidden');
+                    }, 2000);
+                }, 2000);
+            }
+        }
+        
+        // 去集训
+        function goToTraining() {
+            dailyActions.classList.add('hidden');
+            if (Day % 30 !== 10) {
+                showDialog("最近无集训");
+                setTimeout(() => {
+                    dailyActions.classList.remove('hidden');
+                }, 2000);
+            } else {
+                let jxt = Math.floor(Math.random() * 48) + 3;
+                let jxml = jxt * 3;
+                if (jxml >= 100) jxml *= 0.8;
+                showDialog(`本次集训为${jxt}天，训后可增加码力值${Math.floor(jxml)}哦，报名吗?`);
+                trainingConfirmation.classList.remove('hidden');
+            }
+        }
+        
+        // 参加NOIP比赛
+        function 参加NOIP() {
+            dailyActions.classList.add('hidden');
+            if (Day % 3 !== 2) {
+                showDialog("今日没有NOIP比赛");
+                setTimeout(() => {
+                    dailyActions.classList.remove('hidden');
+                }, 2000);
+            } else if (ML <= 60) {
+                showDialog("码力值不足....");
+                setTimeout(() => {
+                    dailyActions.classList.remove('hidden');
+                }, 2000);
+            } else {
+                showDialog("正在前往NOIP考场...");
+                setTimeout(() => {
+                    showDialog("欢迎进入考试现场----NOIP");
+                    setTimeout(() => {
+                        showDialog("请问你要先做哪题？");
+                        examOptions.classList.remove('hidden');
+                    }, 2000);
+                }, 2000);
+            }
+        }
+        
+        // 参加NOI比赛
+        function 参加NOI() {
+            dailyActions.classList.add('hidden');
+            if (Day % 5 !== 2) {
+                showDialog("今日没有NOI比赛");
+                setTimeout(() => {
+                    dailyActions.classList.remove('hidden');
+                }, 2000);
+            } else if (ML <= 150) {
+                showDialog("码力值不足....");
+                setTimeout(() => {
+                    dailyActions.classList.remove('hidden');
+                }, 2000);
+            } else {
+                showDialog("正在前往NOI考场...");
+                setTimeout(() => {
+                    showDialog("欢迎进入考试现场----NOI");
+                    setTimeout(() => {
+                        showDialog("考试开始...");
+                        // NOI考试逻辑
+                        setTimeout(() => {
+                            let score = Math.floor(Math.random() * 300) + 1;
+                            if (ML >= 350) score += 50;
+                            score = Math.min(score, 300);
+                            
+                            showDialog(`考试结束，你得了${score}分`);
+                            
+                            if (score === 0) {
+                                baoling();
+                            } else if (score <= 100) {
+                                showDialog("你得了铜牌");
+                                RP -= 2;
+                                ML += 5;
+                                XQ -= 2;
+                            } else if (score <= 200) {
+                                showDialog("你获得了银牌");
+                                RP -= 4;
+                                ML += 10;
+                                XQ += 2;
+                            } else if (score < 300) {
+                                showDialog("你获得了金牌");
+                                RP += 1;
+                                ML += 20;
+                                XQ += 10;
+                            } else {
+                                showDialog("你AK了，第一名");
+                                RP += 5;
+                                ML += 30;
+                                XQ += 20;
+                            }
+                            
+                            updateStatus();
+                            setTimeout(() => {
+                                dailyActions.classList.remove('hidden');
+                            }, 3000);
+                        }, 3000);
+                    }, 2000);
+                }, 2000);
+            }
+        }
+        
+        // 参加IOI比赛
+        function 参加IOI() {
+            dailyActions.classList.add('hidden');
+            if (Day % 10 !== 4) {
+                showDialog("今日没有IOI比赛");
+                setTimeout(() => {
+                    dailyActions.classList.remove('hidden');
+                }, 2000);
+            } else if (ML <= 300) {
+                showDialog("码力值不足....");
+                setTimeout(() => {
+                    dailyActions.classList.remove('hidden');
+                }, 2000);
+            } else {
+                showDialog("正在前往IOI考场...");
+                setTimeout(() => {
+                    showDialog("欢迎进入考试现场----IOI");
+                    setTimeout(() => {
+                        showDialog("考试开始...");
+                        // IOI考试逻辑
+                        setTimeout(() => {
+                            let score = 0;
+                            for (let i = 1; i <= 3; i++) {
+                                showDialog(`正在做第${i}题...`);
+                                if (i === 1) {
+                                    if (ML >= 600) {
+                                        score += 100;
+                                        showDialog("AC通过！");
+                                    } else {
+                                        let ms = Math.floor(Math.random() * 50) + 11;
+                                        if (ML >= 500) ms += 40;
+                                        score += ms;
+                                        showDialog(`得了${ms}分`);
+                                    }
+                                } else if (i === 2) {
+                                    showDialog("这就是一道简单的最短路径问题嘛!!");
+                                    showDialog("数据这么小，Floyd就可以解决!");
+                                    if (ML >= 600) {
+                                        score += 100;
+                                        showDialog("AC通过！");
+                                    } else {
+                                        let ms = Math.floor(Math.random() * 50) + 11;
+                                        if (ML >= 500) ms += 40;
+                                        score += ms;
+                                        showDialog(`得了${ms}分`);
+                                    }
+                                } else {
+                                    showDialog("这太难了!!");
+                                    showDialog("还剩30分钟，请问你要做什么？？");
+                                    last30Minutes.classList.remove('hidden');
+                                }
+                                if (i < 3) {
+                                    setTimeout(() => {}, 2000);
+                                }
+                            }
+                            
+                            showDialog(`总分：${score}分`);
+                            if (score === 0) {
+                                baoling();
+                            } else if (score <= 100) {
+                                showDialog("你得了铜牌");
+                                RP -= 2;
+                                ML += 10;
+                                XQ += 1;
+                            } else if (score <= 200) {
+                                showDialog("你获得了银牌");
+                                RP -= 4;
+                                ML += 20;
+                                XQ += 5;
+                            } else if (score < 300) {
+                                showDialog("你获得了金牌");
+                                RP += 1;
+                                ML += 30;
+                                XQ += 20;
+                            } else {
+                                showDialog("你AK了，第一名");
+                                RP += 5;
+                                ML += 35;
+                                XQ += 40;
+                            }
+                            
+                            updateStatus();
+                            setTimeout(() => {
+                                dailyActions.classList.remove('hidden');
+                            }, 3000);
+                        }, 3000);
+                    }, 2000);
+                }, 2000);
+            }
+        }
+        
+        // 在家颓废
+        function stayHome() {
+            dailyActions.classList.add('hidden');
+            showDialog("在家颓废了一天，码力值-10，心情+10，人品值-10");
+            ML -= 10;
+            XQ += 10;
+            RP -= 10;
+            updateStatus();
+            setTimeout(() => {
+                dailyActions.classList.remove('hidden');
+            }, 3000);
+        }
+        
+        // 打开网页
+        function openWeb() {
+            dailyActions.classList.add('hidden');
+            showDialog("即将为你打开网页...");
+            setTimeout(() => {
+                webOptions.classList.remove('hidden');
+            }, 2000);
+        }
+        
+        // 打开指定网站
+        function openWebsite(siteId) {
+            let urls = [
+                'https://www.baidu.com', 
+                'https://www.accoders.com', 
+                'http://218.62.22.209:8080', 
+                'http://msannuoi.com', 
+                'https://www.4399.com', 
+                'https://www.luogu.com.cn', 
+                'https://fanyi.baidu.com', 
+                'https://hydro.ac/d/wangping/'
+            ];
+            if (siteId >= 1 && siteId <= 8) {
+                showDialog(`正在打开 ${urls[siteId-1]}`);
+                // 实际游戏中这里会打开新标签页
+                // window.open(urls[siteId-1], '_blank');
+                setTimeout(() => {
+                    webOptions.classList.add('hidden');
+                    dailyActions.classList.remove('hidden');
+                }, 2000);
+            }
+        }
+        
+        // 退出游戏
+        function exitGame() {
+            if (confirm("确定要退出游戏吗？")) {
+                // 重置游戏
+                RP = 0;
+                ML = 0;
+                HG = 0;
+                XQ = 100;
+                Day = 0;
+                JB = 1;
+                name = "";
+                updateStatus();
+                nameInputArea.style.display = 'block';
+                actionPanel.classList.add('hidden');
+                dailyActions.classList.add('hidden');
+                schoolActions.classList.add('hidden');
+                distractionOptions.classList.add('hidden');
+                afterExamOptions.classList.add('hidden');
+                problemSolvingOptions.classList.add('hidden');
+                webOptions.classList.add('hidden');
+                trainingConfirmation.classList.add('hidden');
+                examOptions.classList.add('hidden');
+                last30Minutes.classList.add('hidden');
+                apologizeOptions.classList.add('hidden');
+            }
+        }
+        
+        // 认真听讲
+        function attendClass() {
+            schoolActions.classList.add('hidden');
+            showDialog("你认认真真的听完了课，感觉自已更NB了！");
+            RP += 5;
+            ML += 5;
+            HG += 2;
+            XQ -= 2;
+            updateStatus();
+            setTimeout(() => {
+                dailyActions.classList.remove('hidden');
+            }, 3000);
+        }
+        
+        // 不认真听讲
+        function distractClass() {
+            schoolActions.classList.add('hidden');
+            showDialog("那你要做什么？");
+            distractionOptions.classList.remove('hidden');
+        }
+        
+        // 看小说
+        function readNovel() {
+            distractionOptions.classList.add('hidden');
+            let random = Math.floor(Math.random() * 2) + 1;
+            if (random === 1) {
+                showDialog("你真幸运，没被friendi发现！");
+                RP -= 5;
+                ML -= 2;
+                XQ += 2;
+            } else {
+                showDialog("Oh，No... 有人拍了拍你的肩膀");
+                showDialog("friendi看到了你在看小说！");
+                RP -= 5;
+                ML -= 2;
+                XQ -= 5;
+                HG -= 10;
+            }
+            updateStatus();
+            setTimeout(() => {
+                dailyActions.classList.remove('hidden');
+            }, 3000);
+        }
+        
+        // 看视频
+        function watchVideo() {
+            distractionOptions.classList.add('hidden');
+            let random = Math.floor(Math.random() * 2) + 1;
+            if (random === 1) {
+                showDialog("你真幸运，没被friendi发现！");
+                RP -= 5;
+                ML -= 2;
+                XQ += 2;
+            } else {
+                showDialog("Oh，No... 有人拍了拍你的肩膀");
+                showDialog("friendi看到了你在看视频！");
+                RP -= 5;
+                ML -= 2;
+                XQ -= 5;
+                HG -= 10;
+            }
+            updateStatus();
+            setTimeout(() => {
+                dailyActions.classList.remove('hidden');
+            }, 3000);
+        }
+        
+        // 打游戏
+        function playGame() {
+            distractionOptions.classList.add('hidden');
+            let random = Math.floor(Math.random() * 3) + 1;
+            if (random === 1) {
+                showDialog("你真幸运，没被friendi发现！");
+                RP -= 5;
+                ML -= 2;
+                XQ += 2;
+            } else {
+                showDialog("Oh，No... 有人拍了拍你的肩膀");
+                showDialog("friendi看到了你在玩游戏！");
+                RP -= 5;
+                ML -= 2;
+                XQ -= 2;
+                HG -= 5;
+            }
+            updateStatus();
+            setTimeout(() => {
+                dailyActions.classList.remove('hidden');
+            }, 3000);
+        }
+        
+        // 写游戏
+        function writeGame() {
+            distractionOptions.classList.add('hidden');
+            let random = Math.floor(Math.random() * 2) + 1;
+            if (random === 1) {
+                showDialog("你真幸运，没被friendi发现！");
+                RP -= 5;
+                ML += 2;
+                XQ += 2;
+            } else {
+                showDialog("friendi走了进来，看到你正在打代码.......");
+                let randomResponse = Math.floor(Math.random() * 2) + 1;
+                if (randomResponse === 1) {
+                    showDialog("friendi以为你正在做题，所以摸了摸你的小脑袋");
+                    RP -= 5;
+                    ML += 3;
+                    HG += 1;
+                    XQ += 5;
+                } else {
+                    showDialog("friendi看出了你正在写游戏的代码");
+                    showDialog("friendi十分生气，把你批了一顿！");
+                    RP -= 5;
+                    ML += 3;
+                    HG -= 5;
+                    XQ -= 4;
+                }
+            }
+            updateStatus();
+            setTimeout(() => {
+                dailyActions.classList.remove('hidden');
+            }, 3000);
+        }
+        
+        // 考试后选项
+        function brushQuestions() {
+            afterExamOptions.classList.add('hidden');
+            let random = Math.floor(Math.random() * 2) + 1;
+            if (random === 1) {
+                showDialog("啊啊.. 遇到难题！");
+                showDialog("你要怎么办？");
+                problemSolvingOptions.classList.remove('hidden');
+            } else {
+                showDialog("题真简单...");
+                showDialog("friendi走了进来，看到了你在敲代码，摸了摸你的小脑袋");
+                RP += 10;
+                ML += 5;
+                HG += 10;
+                XQ += 5;
+                updateStatus();
+                setTimeout(() => {
+                    dailyActions.classList.remove('hidden');
+                }, 3000);
+            }
+        }
+        
+        // 睡觉
+        function takeANap() {
+            afterExamOptions.classList.add('hidden');
+            let random = Math.floor(Math.random() * 2) + 1;
+            if (random === 1) {
+                showDialog("你真幸运，没被老师发现！");
+                RP -= 5;
+                XQ += 2;
+            } else {
+                showDialog("friendi走了进来，看到你在大睡，十分生气，狠狠地批了你一顿！");
+                RP -= 5;
+                XQ -= 2;
+                HG -= 5;
+            }
+            updateStatus();
+            setTimeout(() => {
+                dailyActions.classList.remove('hidden');
+            }, 3000);
+        }
+        
+        // 考试后打游戏
+        function playGameAfterExam() {
+            afterExamOptions.classList.add('hidden');
+            let random = Math.floor(Math.random() * 2) + 1;
+            if (random === 1) {
+                showDialog("你真幸运，没被老师发现！");
+                RP -= 5;
+                XQ += 2;
+            } else {
+                showDialog("friendi走了进来，看到你在玩游戏，十分生气，狠狠地批了你一顿！");
+                RP -= 5;
+                XQ -= 2;
+                HG -= 5;
+            }
+            updateStatus();
+            setTimeout(() => {
+                dailyActions.classList.remove('hidden');
+            }, 3000);
+        }
+        
+        // 在线搜索解题方法
+        function searchOnline() {
+            problemSolvingOptions.classList.add('hidden');
+            let random = Math.floor(Math.random() * 4);
+            if (random >= 1 && random <= 3) {
+                showDialog("Oh，No... 有人拍了拍你的肩膀");
+                showDialog("friendi看到了你在查资料！");
+                RP -= 10;
+                HG -= 10;
+                XQ -= 10;
+            } else {
+                showDialog("你真幸运，没被老师发现！");
+                RP -= 5;
+                XQ += 2;
+            }
+            updateStatus();
+            setTimeout(() => {
+                dailyActions.classList.remove('hidden');
+            }, 3000);
+        }
+        
+        // 自己思考解题
+        function thinkByYourself() {
+            problemSolvingOptions.classList.add('hidden');
+            showDialog("friendi走了进来，看到你在认真思考，摸了摸你的小脑袋");
+            RP += 10;
+            ML += 5;
+            HG += 10;
+            XQ += 5;
+            updateStatus();
+            setTimeout(() => {
+                dailyActions.classList.remove('hidden');
+            }, 3000);
+        }
+        
+        // 集训报名
+        function joinTraining() {
+            trainingConfirmation.classList.add('hidden');
+            let jxt = Math.floor(Math.random() * 48) + 3;
+            let jxml = jxt * 3;
+            if (jxml >= 100) jxml *= 0.8;
+            Day += jxt;
+            ML += Math.floor(jxml);
+            XQ -= 10;
+            showDialog(`集训完成，你感觉自己更NB了。`);
+            updateStatus();
+            setTimeout(() => {
+                dailyActions.classList.remove('hidden');
+            }, 3000);
+        }
+        
+        // 取消集训
+        function cancelTraining() {
+            trainingConfirmation.classList.add('hidden');
+            dailyActions.classList.remove('hidden');
+        }
+        
+        // 选择题目
+        function chooseProblem(problemId) {
+            examOptions.classList.add('hidden');
+            if (problemId === 1) {
+                showDialog("这道题是简单的字符串");
+                showDialog("话不多说，10分钟搞定！");
+                showDialog("AC");
+                // 增加码力值
+                ML += 10;
+                updateStatus();
+            } else if (problemId === 2) {
+                showDialog("第二题是深搜");
+                showDialog("你会吗？");
+                setTimeout(() => {
+                    showDialog("1. 会\n2. 不会");
+                    setTimeout(() => {
+                        let random = Math.floor(Math.random() * 2) + 1;
+                        if (random === 1) {
+                            showDialog("那我就考考你（深搜输出全排列）");
+                            showDialog("请输入答案：");
+                            // 模拟用户输入正确答案
+                            setTimeout(() => {
+                                showDialog("看来你是真会深搜！");
+                                showDialog("得了30分");
+                                ML += 30;
+                                updateStatus();
+                            }, 2000);
+                        } else {
+                            showDialog("噢噢噢噢....");
+                        }
+                    }, 2000);
+                }, 2000);
+            } else if (problemId === 3) {
+                if (ML >= 200) {
+                    showDialog("第三题会");
+                    showDialog("打代码中......");
+                    showDialog("得了60分");
+                    ML += 60;
+                    updateStatus();
+                } else {
+                    showDialog("后面的题都不会");
+                }
+            } else if (problemId === 4) {
+                if (ML >= 320) {
+                    showDialog("第四题会");
+                    showDialog("打代码中......");
+                    showDialog("得了40分");
+                    ML += 40;
+                    updateStatus();
+                } else {
+                    showDialog("不会啊！");
+                }
+            }
+            setTimeout(() => {
+                dailyActions.classList.remove('hidden');
+            }, 5000);
+        }
+        
+        // 最后30分钟选择
+        function submitSample() {
+            last30Minutes.classList.add('hidden');
+            let random = Math.floor(Math.random() * 10) + 1;
+            if (ML >= 600) random += 10;
+            showDialog(`你得了${random}分`);
+            setTimeout(() => {
+                dailyActions.classList.remove('hidden');
+            }, 2000);
+        }
+        
+        function playGameLast() {
+            last30Minutes.classList.add('hidden');
+            let random = Math.floor(Math.random() * 2) + 1;
+            if (random === 1) {
+                showDialog("你真幸运，没被考官发现！");
+                RP -= 5;
+                XQ += 2;
+            } else {
+                showDialog("考官走了进来，看到你在玩游戏，十分生气，把你请出考场！");
+                RP -= 5;
+                XQ -= 2;
+            }
+            updateStatus();
+            setTimeout(() => {
+                dailyActions.classList.remove('hidden');
+            }, 3000);
+        }
+        
+        function doNothing() {
+            last30Minutes.classList.add('hidden');
+            dailyActions.classList.remove('hidden');
+        }
+        
+        // 迟到后选择
+        function apologize() {
+            apologizeOptions.classList.add('hidden');
+            showDialog("friendi表扬你是一个知错就改的好OIER");
+            RP += 5;
+            HG += 5;
+            XQ += 5;
+            updateStatus();
+            setTimeout(() => {
+                dailyActions.classList.remove('hidden');
+            }, 3000);
+        }
+        
+        function escapeClass() {
+            apologizeOptions.classList.add('hidden');
+            let random = Math.floor(Math.random() * 2) + 1;
+            if (random === 1) {
+                showDialog("你被friendi碰了个正着，friendi狠狠地批了你一顿！");
+                RP -= 5;
+                HG -= 5;
+                XQ -= 5;
+            } else {
+                showDialog("你竟然没遇到friendi！");
+                showDialog("你溜回了座位，沾沾自喜起来！");
+                RP -= 5;
+                XQ += 2;
+            }
+            updateStatus();
+            setTimeout(() => {
+                dailyActions.classList.remove('hidden');
+            }, 3000);
+        }
+        
+        // 爆零剧情
+        function baoling() {
+            showDialog("考试结束了");
+            setTimeout(() => {
+                showDialog("你满怀期待地点开来查看分数的网站，从前往后开始浏览每个人的编号和名字。");
+                setTimeout(() => {
+                    showDialog("大神1...大神2...大神3... ... ... ... ...");
+                    setTimeout(() => {
+                        showDialog("找了好久好久，终于在列表的最底端找到了");
+                        setTimeout(() => {
+                            showDialog(`${name}的。`);
+                            setTimeout(() => {
+                                showDialog("不对不对，我不可能爆零，应该是重名！");
+                                setTimeout(() => {
+                                    showDialog("你核对了学校——没问题");
+                                    setTimeout(() => {
+                                        showDialog("地区——没问题");
+                                        setTimeout(() => {
+                                            showDialog("考号——必须有问题——");
+                                            setTimeout(() => {
+                                                showDialog("没问题...");
+                                                setTimeout(() => {
+                                                    showDialog("啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊！！！");
+                                                    setTimeout(() => {
+                                                        showDialog("你不得不学着面对这样一个事实：");
+                                                        setTimeout(() => {
+                                                            showDialog("你爆零了。");
+                                                            setTimeout(() => {
+                                                                for (let i = 1; i <= 5; i++) {
+                                                                    setTimeout(() => {
+                                                                        showDialog("你爆零了。");
+                                                                    }, i * 1000);
+                                                                }
+                                                                setTimeout(() => {
+                                                                    showDialog("你看了一遍题和自己的代码，突然发现你本来可以打");
+                                                                    let retg = Math.floor(Math.random() * 100) + 1;
+                                                                    if (ML >= 400) ML += 50;
+                                                                    if (ML >= 550) ML += 50;
+                                                                    if (ML >= 700) ML += 70;
+                                                                    showDialog(`${retg}分的...`);
+                                                                    showDialog("于是，你自闭了.");
+                                                                    RP -= 4;
+                                                                    XQ -= 10;
+                                                                    updateStatus();
+                                                                    setTimeout(() => {
+                                                                        dailyActions.classList.remove('hidden');
+                                                                    }, 3000);
+                                                                }, 7000);
+                                                            }, 2000);
+                                                        }, 2000);
+                                                    }, 2000);
+                                                }, 2000);
+                                            }, 2000);
+                                        }, 2000);
+                                    }, 2000);
+                                }, 2000);
+                            }, 2000);
+                        }, 2000);
+                    }, 2000);
+                }, 2000);
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
