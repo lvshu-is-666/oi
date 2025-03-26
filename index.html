@@ -486,20 +486,18 @@
         
         // 游戏主循环
         function gameLoop() {
-            // 每个游戏日自动增加天数
-            setInterval(() => {
-                Day++;
-                checkLevelUp();
-                updateStatus();
-                checkExpulsion();
-                
-                let dayMessage = `第${Day}天开始了！`;
-                showDialog(dayMessage);
-                
-                setTimeout(() => {
-                    actionPanel.classList.remove('hidden');
-                }, 2000);
-            }, 86400000); // 每天增加一次（86400000毫秒 = 24小时）
+            // 每次进入今日活动页面增加一天
+            actionPanel.addEventListener('transitionend', () => {
+                if (!actionPanel.classList.contains('hidden')) {
+                    Day++;
+                    checkLevelUp();
+                    updateStatus();
+                    checkExpulsion();
+                    
+                    let dayMessage = `第${Day}天开始了！`;
+                    showDialog(dayMessage);
+                }
+            });
         }
         
         // 检查升级
