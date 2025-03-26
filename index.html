@@ -515,6 +515,7 @@
         
         // 游戏主循环
         function gameLoop() {
+            actionPanel.classList.remove('hidden');
             // 每次进入今日活动页面增加一天
             function incrementDay() {
                 Day++;
@@ -524,17 +525,7 @@
                 
                 let dayMessage = `第${Day}天开始了！`;
                 showDialog(dayMessage);
-            }
-            
-            // 在显示actionPanel时增加一天
-            actionPanel.addEventListener('transitionend', () => {
-                if (!actionPanel.classList.contains('hidden')) {
-                    incrementDay();
-                    checkExpulsion();
-                    checkLevelUp();
-                }
-            });
-            
+            }            
         }
         
         // 检查升级
@@ -579,7 +570,7 @@
             if (random === 1) {
                 showDialog("今日没有模拟赛..");
                 setTimeout(() => {
-                    actionPanel.classList.remove('hidden');
+                    gameLoop();
                 }, 2000);
             } else {
                 showDialog("今天的模拟赛好简单啊！so easy!");
@@ -599,7 +590,7 @@
             if (Day % 30 !== 10) {
                 showDialog("最近无集训");
                 setTimeout(() => {
-                    actionPanel.classList.remove('hidden');
+                    gameLoop();
                 }, 2000);
             } else {
                 let jxt = Math.floor(Math.random() * 48) + 3;
@@ -616,12 +607,12 @@
             if (Day % 3 !== 2) {
                 showDialog("今日没有NOIP比赛");
                 setTimeout(() => {
-                    actionPanel.classList.remove('hidden');
+                    gameLoop();
                 }, 2000);
             } else if (ML <= 60) {
                 showDialog("码力值不足....");
                 setTimeout(() => {
-                    actionPanel.classList.remove('hidden');
+                    gameLoop();
                 }, 2000);
             } else {
                 showDialog("正在前往NOIP考场...");
@@ -641,12 +632,12 @@
             if (Day % 5 !== 2) {
                 showDialog("今日没有NOI比赛");
                 setTimeout(() => {
-                    actionPanel.classList.remove('hidden');
+                    gameLoop();
                 }, 2000);
             } else if (ML <= 150) {
                 showDialog("码力值不足....");
                 setTimeout(() => {
-                    actionPanel.classList.remove('hidden');
+                    gameLoop();
                 }, 2000);
             } else {
                 showDialog("正在前往NOI考场...");
@@ -688,7 +679,7 @@
                             
                             updateStatus();
                             setTimeout(() => {
-                                actionPanel.classList.remove('hidden');
+                                gameLoop();
                             }, 3000);
                         }, 3000);
                     }, 2000);
@@ -702,12 +693,12 @@
             if (Day % 10 !== 4) {
                 showDialog("今日没有IOI比赛");
                 setTimeout(() => {
-                    actionPanel.classList.remove('hidden');
+                    gameLoop();
                 }, 2000);
             } else if (ML <= 300) {
                 showDialog("码力值不足....");
                 setTimeout(() => {
-                    actionPanel.classList.remove('hidden');
+                    gameLoop();
                 }, 2000);
             } else {
                 showDialog("正在前往IOI考场...");
@@ -779,7 +770,7 @@
                             
                             updateStatus();
                             setTimeout(() => {
-                                actionPanel.classList.remove('hidden');
+                                gameLoop();
                             }, 3000);
                         }, 3000);
                     }, 2000);
@@ -796,7 +787,7 @@
             RP -= 10;
             updateStatus();
             setTimeout(() => {
-                actionPanel.classList.remove('hidden');
+                gameLoop();
             }, 3000);
         }
         
@@ -827,7 +818,7 @@
                 // window.open(urls[siteId-1], '_blank');
                 setTimeout(() => {
                     webOptions.classList.add('hidden');
-                    actionPanel.classList.remove('hidden');
+                    gameLoop();
                 }, 2000);
             }
         }
@@ -868,7 +859,7 @@
             XQ -= 2;
             updateStatus();
             setTimeout(() => {
-                actionPanel.classList.remove('hidden');
+                gameLoop();
             }, 3000);
         }
         
@@ -898,7 +889,7 @@
             }
             updateStatus();
             setTimeout(() => {
-                actionPanel.classList.remove('hidden');
+                gameLoop();
             }, 3000);
         }
         
@@ -921,7 +912,7 @@
             }
             updateStatus();
             setTimeout(() => {
-                actionPanel.classList.remove('hidden');
+                gameLoop();
             }, 3000);
         }
         
@@ -944,7 +935,7 @@
             }
             updateStatus();
             setTimeout(() => {
-                actionPanel.classList.remove('hidden');
+                gameLoop();
             }, 3000);
         }
         
@@ -977,7 +968,7 @@
             }
             updateStatus();
             setTimeout(() => {
-                actionPanel.classList.remove('hidden');
+                gameLoop();
             }, 3000);
         }
         
@@ -998,7 +989,7 @@
                 XQ += 5;
                 updateStatus();
                 setTimeout(() => {
-                    actionPanel.classList.remove('hidden');
+                    gameLoop();
                 }, 3000);
             }
         }
@@ -1019,7 +1010,7 @@
             }
             updateStatus();
             setTimeout(() => {
-                actionPanel.classList.remove('hidden');
+                gameLoop();
             }, 3000);
         }
         
@@ -1039,7 +1030,7 @@
             }
             updateStatus();
             setTimeout(() => {
-                actionPanel.classList.remove('hidden');
+                gameLoop();
             }, 3000);
         }
         
@@ -1060,7 +1051,7 @@
             }
             updateStatus();
             setTimeout(() => {
-                actionPanel.classList.remove('hidden');
+                gameLoop();
             }, 3000);
         }
         
@@ -1074,7 +1065,7 @@
             XQ += 5;
             updateStatus();
             setTimeout(() => {
-                actionPanel.classList.remove('hidden');
+                gameLoop();
             }, 3000);
         }
         
@@ -1090,14 +1081,14 @@
             showDialog(`集训完成，你感觉自己更NB了。`);
             updateStatus();
             setTimeout(() => {
-                actionPanel.classList.remove('hidden');
+                gameLoop();
             }, 3000);
         }
         
         // 取消集训
         function cancelTraining() {
             trainingConfirmation.classList.add('hidden');
-            actionPanel.classList.remove('hidden');
+            gameLoop();
         }
         
         // 选择题目
@@ -1154,7 +1145,7 @@
                 }
             }
             setTimeout(() => {
-                actionPanel.classList.remove('hidden');
+                gameLoop();
             }, 5000);
         }
         
@@ -1165,7 +1156,7 @@
             if (ML >= 600) random += 10;
             showDialog(`你得了${random}分`);
             setTimeout(() => {
-                actionPanel.classList.remove('hidden');
+                gameLoop();
             }, 2000);
         }
         
@@ -1183,13 +1174,13 @@
             }
             updateStatus();
             setTimeout(() => {
-                actionPanel.classList.remove('hidden');
+                gameLoop();
             }, 3000);
         }
         
         function doNothing() {
             last30Minutes.classList.add('hidden');
-            actionPanel.classList.remove('hidden');
+            gameLoop();
         }
         
         // 迟到后选择
@@ -1201,7 +1192,7 @@
             XQ += 5;
             updateStatus();
             setTimeout(() => {
-                actionPanel.classList.remove('hidden');
+                gameLoop();
             }, 3000);
         }
         
@@ -1221,7 +1212,7 @@
             }
             updateStatus();
             setTimeout(() => {
-                actionPanel.classList.remove('hidden');
+                gameLoop();
             }, 3000);
         }
         
@@ -1270,7 +1261,7 @@
                                                                     XQ -= 10;
                                                                     updateStatus();
                                                                     setTimeout(() => {
-                                                                        actionPanel.classList.remove('hidden');
+                                                                        gameLoop();
                                                                     }, 3000);
                                                                 }, 7000);
                                                             }, 2000);
