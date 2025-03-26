@@ -487,17 +487,29 @@
         // 游戏主循环
         function gameLoop() {
             // 每次进入今日活动页面增加一天
+            function incrementDay() {
+                Day++;
+                checkLevelUp();
+                updateStatus();
+                checkExpulsion();
+                
+                let dayMessage = `第${Day}天开始了！`;
+                showDialog(dayMessage);
+            }
+            
+            // 在显示actionPanel时增加一天
             actionPanel.addEventListener('transitionend', () => {
                 if (!actionPanel.classList.contains('hidden')) {
-                    Day++;
-                    checkLevelUp();
-                    updateStatus();
-                    checkExpulsion();
-                    
-                    let dayMessage = `第${Day}天开始了！`;
-                    showDialog(dayMessage);
+                    incrementDay();
                 }
-            });
+            }, { once: true });
+            
+            // 每次重新显示actionPanel时增加一天
+            actionPanel.addEventListener('transitionend', () => {
+                if (!actionPanel.classList.contains('hidden')) {
+                    incrementDay();
+                }
+            }, { once: true });
         }
         
         // 检查升级
