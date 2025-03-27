@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OI的成长之路</title>
+    <style>
+        :root {
+            --primary-color: #6a11cb;
+            --secondary-color: #ff9a9e;
+            --accent-color: #fad0c4;
+            --background-color: #f5f7fa;
+            --card-color: #ffffff;
+            --text-color: #333333;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--background-color) 0%, var(--accent-color) 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+        
+        .status-panel {
+            background: var(--card-color);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px var(--shadow-color);
+            padding: 20px;
+            position: sticky;
+            top: 20px;
+        }
+        
+        .status-panel h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .status-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .status-item:last-child {
+            border-bottom: none;
+        }
+        
+        .status-item label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .status-item .value {
+            font-size: 1.2em;
+            text-align: right;
+        }
+        
+        .game-area {
+            background: var(--card-color);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px var(--shadow-color);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .game-header {
+            margin-bottom: 20px;
+        }
+        
+        .game-header h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .game-content {
+            flex: 1;
+            margin-bottom: 20px;
+            overflow-y: auto;
+            padding: 15px;
+            border: 1px dashed #eee;
+            border-radius: 8px;
+        }
+        
+        .game-content p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        
+        .action-button {
+            background: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
+            color: var(--primary-color);
+            border: none;
+            border-radius: 50px;
+            padding: 12px 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .action-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px var(--shadow-color);
+        }
+        
+        .action-button:active {
+            transform: translateY(0);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: var(--card-color);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px var(--shadow-color);
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        .modal-content h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .modal-content p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+            text-align: center;
+        }
+        
+        .modal-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .modal-button {
+            background: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
+            color: var(--primary-color);
+            border: none;
+            border-radius: 50px;
+            padding: 10px 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px var(--shadow-color);
+        }
+        
+        .notification {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--card-color);
+            padding: 15px 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px var(--shadow-color);
+            max-width: 300px;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+        
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .top-controls {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+        
+        .control-button {
+            background: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
+            color: var(--primary-color);
+            border: none;
+            border-radius: 50px;
+            padding: 10px 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .control-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px var(--shadow-color);
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background: #eee;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
+        }
+        
+        .code-display {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-controls">
+        <button class="control-button" id="saveGame">保存游戏</button>
+        <button class="control-button" id="loadGame">加载游戏</button>
+        <button class="control-button" id="newGame">新游戏</button>
+    </div>
+    
+    <div class="container">
+        <div class="status-panel">
+            <h2>状态面板</h2>
+            <div class="status-item">
+                <label>角色名称</label>
+                <div class="value" id="player-name">无名氏</div>
+            </div>
+            <div class="status-item">
+                <label>人品值</label>
+                <div class="value" id="rp-value">0</div>
+            </div>
+            <div class="status-item">
+                <label>码力值</label>
+                <div class="value" id="ml-value">0</div>
+            </div>
+            <div class="status-item">
+                <label>好感度</label>
+                <div class="value" id="hg-value">0</div>
+            </div>
+            <div class="status-item">
+                <label>心情值</label>
+                <div class="value" id="xq-value">100</div>
+            </div>
+            <div class="status-item">
+                <label>坚持天数</label>
+                <div class="value" id="day-value">0</div>
+            </div>
+            <div class="status-item">
+                <label>级别</label>
+                <div class="value" id="jb-value">1</div>
+            </div>
+        </div>
+        
+        <div class="game-area">
+            <div class="game-header">
+                <h1 id="game-title">OI的成长之路</h1>
+            </div>
+            <div class="game-content" id="game-content">
+                <p>欢迎来到OI的成长之路，请输入你的名字开始游戏。</p>
+            </div>
+            <div class="action-buttons" id="action-buttons">
+                <button class="action-button" id="start-button">开始游戏</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal" id="nameModal">
+        <div class="modal-content">
+            <h2>创建角色</h2>
+            <p>请输入你的名字：</p>
+            <input type="text" class="modal-input" id="playerName" placeholder="你的名字">
+            <div class="modal-buttons">
+                <button class="modal-button" id="startGameBtn">开始游戏</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal" id="cheatModal">
+        <div class="modal-content">
+            <h2>作者模式</h2>
+            <p>请输入你的作弊码力值（≤1000）：</p>
+            <input type="number" class="modal-input" id="cheatML" placeholder="码力值" min="0" max="1000">
+            <p>请输入你的人品值（≤1000）：</p>
+            <input type="number" class="modal-input" id="cheatRP" placeholder="人品值" min="0" max="1000">
+            <p>请输入你的好感度（≤1000）：</p>
+            <input type="number" class="modal-input" id="cheatHG" placeholder="好感度" min="0" max="1000">
+            <div class="modal-buttons">
+                <button class="modal-button" id="confirmCheatBtn">确认</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal" id="choiceModal">
+        <div class="modal-content">
+            <h2 id="choice-title">选择</h2>
+            <div id="choice-content"></div>
+            <div class="modal-buttons" id="choice-buttons"></div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification"></div>
+    
+    <script>
+        // 游戏状态
+        let gameState = {
+            name: '',
+            rp: 0,
+            ml: 0,
+            hg: 0,
+            xq: 100,
+            day: 0,
+            jb: 1,
+            isAuthorMode: false,
+            currentActivity: null
+        };
+        
+        // DOM 元素
+        const playerNameInput = document.getElementById('playerName');
+        const startGameBtn = document.getElementById('startGameBtn');
+        const confirmCheatBtn = document.getElementById('confirmCheatBtn');
+        const nameModal = document.getElementById('nameModal');
+        const cheatModal = document.getElementById('cheatModal');
+        const choiceModal = document.getElementById('choiceModal');
+        const choiceTitle = document.getElementById('choice-title');
+        const choiceContent = document.getElementById('choice-content');
+        const choiceButtons = document.getElementById('choice-buttons');
+        const gameTitle = document.getElementById('game-title');
+        const gameContent = document.getElementById('game-content');
+        const actionButtons = document.getElementById('action-buttons');
+        const notification = document.getElementById('notification');
+        const saveGameBtn = document.getElementById('saveGame');
+        const loadGameBtn = document.getElementById('loadGame');
+        const newGameBtn = document.getElementById('newGame');
+        
+        // 状态面板元素
+        const playerNameDisplay = document.getElementById('player-name');
+        const rpValue = document.getElementById('rp-value');
+        const mlValue = document.getElementById('ml-value');
+        const hgValue = document.getElementById('hg-value');
+        const xqValue = document.getElementById('xq-value');
+        const dayValue = document.getElementById('day-value');
+        const jbValue = document.getElementById('jb-value');
+        
+        // 初始化游戏
+        function initGame() {
+            // 检查是否有保存的游戏
+            const savedGame = localStorage.getItem('oiGame');
+            if (savedGame) {
+                gameState = JSON.parse(savedGame);
+                updateUI();
+                showGame();
+            } else {
+                showNameModal();
+            }
+        }
+        
+        // 显示名字输入框
+        function showNameModal() {
+            nameModal.style.display = 'flex';
+            gameTitle.textContent = 'OI的成长之路';
+            gameContent.innerHTML = '<p>欢迎来到OI的成长之路，请输入你的名字开始游戏。</p>';
+            actionButtons.innerHTML = '<button class="action-button" id="start-button">开始游戏</button>';
+            document.getElementById('start-button').addEventListener('click', () => {
+                nameModal.style.display = 'flex';
+            });
+        }
+        
+        // 开始新游戏
+        function startNewGame() {
+            const name = playerNameInput.value.trim();
+            if (name === '') {
+                showNotification('请输入你的名字');
+                return;
+            }
+            
+            if (checkAuthorMode(name)) {
+                showCheatModal();
+            } else {
+                gameState = {
+                    name: name,
+                    rp: 0,
+                    ml: 0,
+                    hg: 0,
+                    xq: 100,
+                    day: 0,
+                    jb: 1,
+                    isAuthorMode: false,
+                    currentActivity: null
+                };
+                localStorage.removeItem('oiGame');
+                updateUI();
+                showGame();
+                nameModal.style.display = 'none';
+                showDayStart();
+            }
+        }
+        
+        // 检查是否为作者模式
+        function checkAuthorMode(name) {
+            const authorNames = ['王平', 'wangping', 'Aranea', '晨曦', 'yangmo', '杨默', 'HuZHUNZHUN'];
+            return authorNames.some(authorName => name.toLowerCase() === authorName.toLowerCase());
+        }
+        
+        // 显示作弊码输入框
+        function showCheatModal() {
+            cheatModal.style.display = 'flex';
+        }
+        
+        // 确认作弊码
+        function confirmCheat() {
+            gameState.ml = parseInt(document.getElementById('cheatML').value) || 0;
+            gameState.rp = parseInt(document.getElementById('cheatRP').value) || 0;
+            gameState.hg = parseInt(document.getElementById('cheatHG').value) || 0;
+            gameState.isAuthorMode = true;
+            cheatModal.style.display = 'none';
+            updateUI();
+            showGame();
+            showDayStart();
+        }
+        
+        // 显示游戏主界面
+        function showGame() {
+            nameModal.style.display = 'none';
+            cheatModal.style.display = 'none';
+            gameTitle.textContent = 'OI的成长之路';
+            showDayStart();
+        }
+        
+        // 显示新的一天开始
+        function showDayStart() {
+            gameState.day++;
+            updateLevel();
+            gameContent.innerHTML = `
+                <h3>第 ${gameState.day} 天</h3>
+                <p>新的一天开始了，你准备好了吗？</p>
+            `;
+            showActions();
+        }
+        
+        // 更新等级
+        function updateLevel() {
+            const days = gameState.day;
+            gameState.jb = 1;
+            
+            if (days >= 500) {
+                gameState.jb += Math.floor((days - 500) / 150) + 4;
+            } else if (days >= 400) {
+                gameState.jb = 5;
+            } else if (days >= 300) {
+                gameState.jb = 4;
+            } else if (days >= 200) {
+                gameState.jb = 3;
+            } else if (days >= 100) {
+                gameState.jb = 2;
+            }
+            
+            if (days === 365) {
+                gameState.rp += 10;
+                gameState.ml += 10;
+                gameState.xq += 10;
+                gameState.hg += 10;
+                showNotification('恭喜你坚持了1年，获得彩蛋奖励！');
+            }
+            
+            updateUI();
+        }
+        
+        // 显示可执行的动作
+        function showActions() {
+            actionButtons.innerHTML = '';
+            
+            const actions = [
+                { id: 1, text: '去师大附中' },
+                { id: 2, text: '参加模拟赛' },
+                { id: 3, text: '去集训' },
+                { id: 4, text: '去参加NOIP比赛' },
+                { id: 5, text: '去参加NOI比赛' },
+                { id: 6, text: '参加IOI比赛' },
+                { id: 7, text: '在家里颓废' },
+                { id: 8, text: '打开网页浏览' }
+            ];
+            
+            actions.forEach(action => {
+                const button = document.createElement('button');
+                button.className = 'action-button';
+                button.textContent = action.text;
+                button.dataset.id = action.id;
+                button.addEventListener('click', () => performAction(action.id));
+                actionButtons.appendChild(button);
+            });
+        }
+        
+        // 执行动作
+        function performAction(actionId) {
+            gameState.currentActivity = actionId;
+            switch (actionId) {
+                case 1:
+                    shidafuzhong();
+                    break;
+                case 2:
+                    monisai();
+                    break;
+                case 3:
+                    jixun();
+                    break;
+                case 4:
+                    NOIP();
+                    break;
+                case 5:
+                    NOI();
+                    break;
+                case 6:
+                    IOI();
+                    break;
+                case 7:
+                    stayHome();
+                    break;
+                case 8:
+                    openfile();
+                    break;
+                default:
+                    showNotification('无效的动作');
+            }
+        }
+        
+        // 师大附中
+        function shidafuzhong() {
+            gameTitle.textContent = '师大附中';
+            gameContent.innerHTML = '';
+            
+            if (gameState.day % 7 === 6) {
+                gameContent.innerHTML = '<p>今天是星期六，有模拟赛！！</p>';
+                
+                const retg = Math.floor(Math.random() * 2) + 1;
+                if (retg === 1) {
+                    gameContent.innerHTML += `
+                        <p>你堵车了，迟到了3分钟！</p>
+                        <p>于是你要：</p>
+                    `;
+                    
+                    showChoice([
+                        { text: '向老师认错', callback: () => confessTardy() },
+                        { text: '鬼刀一开看不见，逃进教室！', callback: () => sneakIn() }
+                    ]);
+                } else {
+                    simulateClassDay();
+                }
+            } else {
+                simulateClassDay();
+            }
+        }
+        
+        // 承认迟到
+        function confessTardy() {
+            gameState.rp += 5;
+            gameState.hg += 5;
+            gameState.xq += 5;
+            gameContent.innerHTML = `
+                <p>friendi表扬你是一个知错就改的好OIER</p>
+                <p>人品值+5，好感度+5，心情值+5</p>
+            `;
+            updateUI();
+            setTimeout(() => {
+                simulateClassDay();
+            }, 2000);
+        }
+        
+        // 溜进教室
+        function sneakIn() {
+            const retg = Math.floor(Math.random() * 2) + 1;
+            if (retg === 1) {
+                gameState.rp -= 5;
+                gameState.hg -= 5;
+                gameState.xq -= 5;
+                gameContent.innerHTML = `
+                    <p>你被friendi碰了个正着，friendi狠狠地批了你一顿！</p>
+                    <p>人品值-5，好感度-5，心情值-5</p>
+                `;
+            } else {
+                gameState.rp -= 5;
+                gameState.xq += 2;
+                gameContent.innerHTML = `
+                    <p>你竟然没遇到friendi！</p>
+                    <p>你溜回了座位，沾沾自喜起来！</p>
+                    <p>人品值-5，心情值+2</p>
+                `;
+            }
+            updateUI();
+            setTimeout(() => {
+                simulateClassDay();
+            }, 2000);
+        }
+        
+        // 模拟上课日
+        function simulateClassDay() {
+            gameContent.innerHTML = '<p>老师开始讲课了，你要认真听讲吗？</p>';
+            
+            showChoice([
+                { text: '认真听讲', callback: () => study认真() },
+                { text: '不认真听讲', callback: () => notStudy认真() }
+            ]);
+        }
+        
+        // 认真听讲
+        function study认真() {
+            gameState.rp += 5;
+            gameState.ml += 5;
+            gameState.hg += 2;
+            gameState.xq -= 2;
+            gameContent.innerHTML = `
+                <p>你认认真真的听完了课，感觉自已更NB了！</p>
+                <p>人品值+5，码力值+5，好感度+2，心情值-2</p>
+            `;
+            updateUI();
+            setTimeout(() => {
+                showDayEnd();
+            }, 2000);
+        }
+        
+        // 不认真听讲
+        function notStudy认真() {
+            gameContent.innerHTML = '<p>那你要干神魔？</p>';
+            
+            showChoice([
+                { text: '看小说', callback: () => readNovel() },
+                { text: '看视频', callback: () => watchVideo() },
+                { text: '打游戏', callback: () => playGame() },
+                { text: '写游戏', callback: () => writeGame() }
+            ]);
+        }
+        
+        // 看小说
+        function readNovel() {
+            const retg = Math.floor(Math.random() * 2) + 1;
+            if (retg === 1) {
+                gameState.rp -= 5;
+                gameState.ml -= 2;
+                gameState.xq += 2;
+                gameContent.innerHTML = `
+                    <p>你真幸运，没被friendi发现！</p>
+                    <p>人品值-5，码力值-2，心情+2</p>
+                `;
+            } else {
+                gameState.rp -= 5;
+                gameState.ml -= 2;
+                gameState.xq -= 5;
+                gameState.hg -= 10;
+                gameContent.innerHTML = `
+                    <p>Oh，No... 有人拍了拍你的肩膀</p>
+                    <p>friendi发现你在看小说，批评了你</p>
+                    <p>人品值-5，码力值-2，心情-5，好感度-10</p>
+                `;
+            }
+            updateUI();
+            setTimeout(() => {
+                showDayEnd();
+            }, 2000);
+        }
+        
+        // 看视频
+        function watchVideo() {
+            const retg = Math.floor(Math.random() * 2) + 1;
+            if (retg === 1) {
+                gameState.rp -= 5;
+                gameState.ml -= 2;
+                gameState.xq += 2;
+                gameContent.innerHTML = `
+                    <p>你真幸运，没被friendi发现！</p>
+                    <p>人品值-5，码力值-2，心情+2</p>
+                `;
+            } else {
+                gameState.rp -= 5;
+                gameState.ml -= 2;
+                gameState.xq -= 5;
+                gameState.hg -= 10;
+                gameContent.innerHTML = `
+                    <p>Oh，No... 有人拍了拍你的肩膀</p>
+                    <p>friendi发现你在看视频，批评了你</p>
+                    <p>人品值-5，码力值-2，心情-5，好感度-10</p>
+                `;
+            }
+            updateUI();
+            setTimeout(() => {
+                showDayEnd();
+            }, 2000);
+        }
+        
+        // 打游戏
+        function playGame() {
+            const retg = Math.floor(Math.random() * 3) + 1;
+            if (retg === 1) {
+                gameState.rp -= 5;
+                gameState.ml -= 2;
+                gameState.xq += 2;
+                gameContent.innerHTML = `
+                    <p>你真幸运，没被friendi发现！</p>
+                    <p>人品值-5，码力值-2，心情+2</p>
+                `;
+            } else {
+                if (gameState.rp <= 50) {
+                    gameOver();
+                    return;
+                }
+                
+                gameContent.innerHTML = `
+                    <p>你感受到了一种陌生的不安.</p>
+                    <p>一个黑色高大的阴影似乎遮住了你身后的灯的光.</p>
+                    <p>一只手搭上了你的肩膀，friendi发现了你！</p>
+                `;
+                
+                gameState.rp -= 5;
+                gameState.xq -= 2;
+                gameState.hg -= 5;
+                
+                updateUI();
+                
+                gameContent.innerHTML += `
+                    <p>人品值-5，心情-2，好感度-5</p>
+                `;
+                
+                setTimeout(() => {
+                    showDayEnd();
+                }, 2000);
+            }
+        }
+        
+        // 写游戏
+        function writeGame() {
+            const retg = Math.floor(Math.random() * 2) + 1;
+            if (retg === 1) {
+                gameState.rp -= 5;
+                gameState.ml += 2;
+                gameState.xq += 2;
+                gameContent.innerHTML = `
+                    <p>你真幸运，没被friendi发现！</p>
+                    <p>人品值-5，码力值+2，心情+2</p>
+                `;
+            } else {
+                const retg2 = Math.floor(Math.random() * 2) + 1;
+                if (retg2 === 1) {
+                    gameState.rp -= 5;
+                    gameState.ml += 3;
+                    gameState.hg += 1;
+                    gameState.xq += 5;
+                    gameContent.innerHTML = `
+                        <p>friendi以为你正在做题，摸了摸你的小脑袋</p>
+                        <p>人品值-5，码力值+3，好感度+1，心情值+5</p>
+                    `;
+                } else {
+                    gameState.rp -= 5;
+                    gameState.ml += 3;
+                    gameState.hg -= 5;
+                    gameState.xq -= 4;
+                    gameContent.innerHTML = `
+                        <p>friendi看出了你正在写游戏的代码</p>
+                        <p>friendi十分生气，把你批了一顿！</p>
+                        <p>人品值-5，码力值+3，好感度-5，心情值-4</p>
+                    `;
+                }
+            }
+            updateUI();
+            setTimeout(() => {
+                showDayEnd();
+            }, 2000);
+        }
+        
+        // 模拟赛
+        function monisai() {
+            gameTitle.textContent = '模拟赛';
+            gameContent.innerHTML = '';
+            
+            const retg = Math.floor(Math.random() * 3) + 1;
+            if (retg === 1 || retg === 3) {
+                gameContent.innerHTML = `
+                    <p>今天的模拟赛好简单啊！so easy!</p>
+                    <p>你用了一半的时间就答完了题，AK!!</p>
+                    <p>你想在剩下的一半时间做神魔？</p>
+                `;
+                
+                showChoice([
+                    { text: '刷题', callback: () => brushQuestions() },
+                    { text: '睡觉', callback: () => sleepDuringContest() },
+                    { text: '打游戏', callback: () => playGameDuringContest() }
+                ]);
+            } else {
+                gameContent.innerHTML = `
+                    <p>今天的模拟赛好难啊！！</p>
+                    <p>噼里啪啦噼里啪啦....</p>
+                    <p>铃铃铃...</p>
+                    <p>在响铃的一刻，交上了代码！</p>
+                    <p>心情-2，码力值+2</p>
+                `;
+                
+                gameState.xq -= 2;
+                gameState.ml += 2;
+                updateUI();
+                
+                setTimeout(() => {
+                    showDayEnd();
+                }, 2000);
+            }
+        }
+        
+        // 刷题
+        function brushQuestions() {
+            const retg = Math.floor(Math.random() * 2) + 1;
+            if (retg === 1) {
+                gameContent.innerHTML = `
+                    <p>啊啊.. 遇到难题！怎么办？</p>
+                `;
+                
+                showChoice([
+                    { text: '在网上找代码', callback: () => searchCode() },
+                    { text: '自己思考', callback: () => thinkByYourself() }
+                ]);
+            } else {
+                gameState.rp += 10;
+                gameState.ml += 5;
+                gameState.hg += 10;
+                gameState.xq += 5;
+                gameContent.innerHTML = `
+                    <p>题真简单...</p>
+                    <p>正在狂敲代码！突然，friendi走了进来，看到了你在敲代码，摸了摸你的小脑袋</p>
+                    <p>好感度+10，人品值+10，心情+5，码力值+5</p>
+                `;
+                updateUI();
+                setTimeout(() => {
+                    showDayEnd();
+                }, 2000);
+            }
+        }
+        
+        // 网上找代码
+        function searchCode() {
+            const retgp = Math.floor(Math.random() * 4);
+            if (retgp === 1 || retgp === 2 || retgp === 3) {
+                gameState.rp -= 10;
+                gameState.hg -= 10;
+                gameState.xq -= 10;
+                gameContent.innerHTML = `
+                    <p>Oh，No... 有人拍了拍你的肩膀</p>
+                    <p>friendi发现你在上网找代码，狠狠地批了你一顿！</p>
+                    <p>好感度-10，人品值-10，心情-10</p>
+                `;
+            } else {
+                gameState.rp -= 5;
+                gameState.xq += 2;
+                gameContent.innerHTML = `
+                    <p>你真幸运，没被老师发现！</p>
+                    <p>人品值-5，心情+2</p>
+                `;
