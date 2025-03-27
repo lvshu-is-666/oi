@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OI的成长之路</title>
+    <!-- 引入CryptoJS库用于加密 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
         :root {
             --primary-color: #ff6b9d;
@@ -263,6 +265,9 @@
     </div>
 
     <script>
+        // 加密密钥 - 可以更改为你自己的密钥
+        const ENCRYPTION_KEY = "OI_Growth_Game_Secret_Key_123!@#";
+        
         // 游戏状态
         const gameState = {
             RP: 0,
@@ -272,7 +277,9 @@
             JB: 1,
             Day: 0,
             name: "",
-            isCheatMode: false
+            isCheatMode: false,
+            // 添加版本控制
+            version: "1.0.1"
         };
 
         // DOM元素
@@ -304,22 +311,90 @@
             closeSaveLoad: document.getElementById('closeSaveLoad')
         };
 
+        // 加密函数
+        function encryptData(data) {
+            try {
+                const encrypted = CryptoJS.AES.encrypt(JSON.stringify(data), ENCRYPTION_KEY).toString();
+                return encrypted;
+            } catch (e) {
+                console.error("加密失败:", e);
+                return null;
+            }
+        }
+
+        // 解密函数
+        function decryptData(encryptedData) {
+            try {
+                const bytes = CryptoJS.AES.decrypt(encryptedData, ENCRYPTION_KEY);
+                const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+                return JSON.parse(decrypted);
+            } catch (e) {
+                console.error("解密失败:", e);
+                return null;
+            }
+        }
+
+        // 生成数据校验码
+        function generateChecksum(data) {
+            // 简单的校验和算法，可以根据需要增强
+            let str = JSON.stringify(data);
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Convert to 32bit integer
+            }
+            return hash.toString(16);
+        }
+
+        // 验证数据完整性
+        function validateData(data) {
+            if (!data || typeof data !== 'object') return false;
+            
+            // 检查版本
+            if (data.version !== gameState.version) {
+                console.warn(`版本不匹配: 存档版本 ${data.version}, 当前版本 ${gameState.version}`);
+                return false;
+            }
+            
+            // 检查必需字段
+            const requiredFields = ['RP', 'ML', 'HG', 'XQ', 'JB', 'Day', 'name', 'isCheatMode'];
+            for (const field of requiredFields) {
+                if (!(field in data)) {
+                    console.warn(`缺少必需字段: ${field}`);
+                    return false;
+                }
+            }
+            
+            // 检查数值范围
+            if (data.RP < -100 || data.RP > 9999) return false;
+            if (data.ML < -100 || data.ML > 9999) return false;
+            if (data.HG < -100 || data.HG > 9999) return false;
+            if (data.XQ < 0 || data.XQ > 9999) return false;
+            if (data.JB < 1 || data.JB > 9999) return false;
+            if (data.Day < 0 || data.Day > 99999999) return false;
+            
+            return true;
+        }
+
         // 初始化游戏
         function initGame() {
             // 尝试加载保存的游戏
             const savedGame = localStorage.getItem('oiGrowthGame');
             if (savedGame) {
                 try {
-                    const parsed = JSON.parse(savedGame);
-                    Object.assign(gameState, parsed);
-                    updateUI();
-                    showMainMenu();
+                    const decrypted = decryptData(savedGame);
+                    if (decrypted && validateData(decrypted)) {
+                        Object.assign(gameState, decrypted);
+                        updateUI();
+                        showMainMenu();
+                        return;
+                    }
                 } catch (e) {
-                    showNewGameModal();
+                    console.error("加载存档失败:", e);
                 }
-            } else {
-                showNewGameModal();
             }
+            showNewGameModal();
         }
 
         // 显示新游戏模态框
@@ -337,7 +412,7 @@
         // 显示保存/加载模态框
         function showSaveLoadModal() {
             elements.saveLoadModal.style.display = 'flex';
-            elements.saveData.value = JSON.stringify(gameState);
+            elements.saveData.value = '';
             elements.loadData.value = '';
         }
 
@@ -355,13 +430,13 @@
             gameState.XQ = 100;
             gameState.JB = 1;
             gameState.Day = 0;
+            gameState.isCheatMode = false;
             
             // 检查是否是作弊模式
             const cheatNames = ["王平", "wangping", "Aranea", "晨曦", "yangmo", "杨默", "HuZHUNZHUN"];
             gameState.isCheatMode = cheatNames.includes(name);
             
             if (gameState.isCheatMode) {
-                // 作弊模式 - 在UI中处理初始值设置
                 typeText("已开启作者作弊模式！\n请选择初始属性值。", () => {
                     showCheatModeOptions();
                 });
@@ -424,19 +499,55 @@
 
         // 保存游戏
         function saveGame() {
-            localStorage.setItem('oiGrowthGame', JSON.stringify(gameState));
+            // 添加校验和
+            const dataToSave = {
+                ...gameState,
+                checksum: generateChecksum(gameState)
+            };
+            
+            const encrypted = encryptData(dataToSave);
+            if (encrypted) {
+                localStorage.setItem('oiGrowthGame', encrypted);
+                return true;
+            }
+            return false;
+        }
+
+        // 生成保存数据
+        function generateSaveData() {
+            const dataToSave = {
+                ...gameState,
+                checksum: generateChecksum(gameState)
+            };
+            return encryptData(dataToSave);
         }
 
         // 加载游戏
-        function loadGame(data) {
+        function loadGame(encryptedData) {
             try {
-                const parsed = JSON.parse(data);
-                Object.assign(gameState, parsed);
+                const decrypted = decryptData(encryptedData);
+                if (!decrypted || !validateData(decrypted)) {
+                    alert("无效的存档数据！");
+                    return false;
+                }
+                
+                // 验证校验和
+                const checksum = decrypted.checksum;
+                delete decrypted.checksum;
+                
+                if (generateChecksum(decrypted) !== checksum) {
+                    alert("存档数据已被篡改！");
+                    return false;
+                }
+                
+                Object.assign(gameState, decrypted);
                 updateUI();
                 showMainMenu();
-                saveGame();
+                saveGame(); // 重新保存以更新校验和
                 return true;
             } catch (e) {
+                console.error("加载游戏失败:", e);
+                alert("加载游戏失败，数据可能已损坏！");
                 return false;
             }
         }
@@ -490,7 +601,7 @@
 
         // 显示主菜单
         function showMainMenu() {
-            checkGameOver();
+            if (checkGameOver()) return;
             
             // 更新天数并检查级别提升
             gameState.Day++;
@@ -1514,13 +1625,16 @@
         });
         elements.cancelNewGame.addEventListener('click', hideNewGameModal);
         elements.saveGameBtn.addEventListener('click', () => {
-            elements.saveData.value = JSON.stringify(gameState);
+            const saveData = generateSaveData();
+            if (saveData) {
+                elements.saveData.value = saveData;
+            } else {
+                alert("生成保存数据失败！");
+            }
         });
         elements.loadGameBtn.addEventListener('click', () => {
             if (loadGame(elements.loadData.value)) {
                 hideSaveLoadModal();
-            } else {
-                alert("无效的保存数据！");
             }
         });
         elements.closeSaveLoad.addEventListener('click', hideSaveLoadModal);
