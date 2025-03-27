@@ -3,1397 +3,1530 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OI的成长之路 - 绿树公司</title>
+    <title>OI的成长之路</title>
     <style>
-        body {
-            font-family: 'Microsoft YaHei', sans-serif;
-            background-color: #f5f7fa;
+        :root {
+            --primary-color: #ff6b9d;
+            --secondary-color: #b873ff;
+            --bg-gradient: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            --panel-bg: rgba(255, 255, 255, 0.8);
+            --text-color: #333;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
             margin: 0;
             padding: 0;
-            color: #333;
-            display: flex;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
-        /* 固定状态面板 */
-        .status-panel {
-            width: 250px;
-            background-color: #fff;
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            position: fixed;
-            left: 30px;
-            top: 30px;
-            height: calc(100vh - 60px);
-            overflow-y: auto;
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
         }
-        
-        .status-panel h2 {
-            margin-top: 0;
-            color: #2c3e50;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-            font-size: 18px;
-        }
-        
-        .status-item {
-            margin: 12px 0;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .status-item::before {
-            content: '';
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background-color: #3498db;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
-        
-        .game-area {
-            margin-left: 300px;
-            padding: 30px;
-            width: calc(100% - 330px);
-        }
-        
+
         .header {
-            text-align: center;
-            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
         }
-        
-        .header h1 {
-            color: #2c3e50;
-            font-size: 28px;
-            margin-bottom: 10px;
+
+        h1 {
+            color: #5a2d82;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
         }
-        
-        .header p {
-            color: #7f8c8d;
-            font-size: 14px;
-        }
-        
-        .dialog {
-            margin: 20px 0;
-            padding: 15px 20px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            white-space: pre-wrap;
-            line-height: 1.6;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            font-size: 14px;
-        }
-        
-        .input-area {
-            margin: 20px 0;
-        }
-        
-        .input-area input {
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            width: 200px;
-            font-size: 14px;
-        }
-        
-        .input-area button {
-            padding: 10px 15px;
-            background-color: #2ecc71;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-left: 10px;
-            font-size: 14px;
-            transition: background-color 0.3s;
-        }
-        
-        .input-area button:hover {
-            background-color: #27ae60;
-        }
-        
-        .action-panel {
-            margin-bottom: 30px;
-        }
-        
-        .action-panel h2 {
-            margin-top: 0;
-            color: #2c3e50;
-            font-size: 18px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .action-list {
-            list-style-type: none;
-            padding: 0;
-        }
-        
-        .action-list li {
-            margin: 10px 0;
-        }
-        
-        .action-list button {
-            padding: 10px 15px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            width: 100%;
-            text-align: left;
-            font-size: 14px;
-        }
-        
-        .action-list button:hover {
-            background-color: #2980b9;
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        .loading-bar {
-            width: 100%;
-            height: 20px;
-            background-color: #ecf0f1;
-            border-radius: 10px;
-            margin: 10px 0;
-            overflow: hidden;
-        }
-        
-        .loading-progress {
-            height: 100%;
-            background-color: #3498db;
-            width: 0%;
-            transition: width 0.5s;
-        }
-        
-        .loading-text {
-            text-align: center;
-            margin-top: 5px;
-            color: #7f8c8d;
-            font-size: 12px;
-        }
-        
-        .footer {
-            text-align: center;
-            margin-top: 30px;
-            color: #7f8c8d;
-            font-size: 12px;
-            position: fixed;
-            bottom: 30px;
-            width: calc(100% - 60px);
-        }
-        
+
         .game-controls {
-            position: fixed;
-            right: 30px;
-            top: 30px;
+            display: flex;
+            gap: 10px;
         }
-        
-        .game-controls button {
-            padding: 10px 15px;
-            margin: 5px 0;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            background-color: #3498db;
+
+        button {
+            background: var(--primary-color);
             color: white;
-            font-size: 14px;
-            transition: background-color 0.3s;
-            display: block;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: var(--shadow);
         }
-        
-        .game-controls button:hover {
-            background-color: #2980b9;
+
+        button:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+
+        .status-panel {
+            background: var(--panel-bg);
+            padding: 20px;
+            border-radius: 15px;
+            width: 250px;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+
+        .status-item {
+            margin-bottom: 15px;
+        }
+
+        .status-item h3 {
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--secondary-color);
+            border-radius: 5px;
+            transition: width 0.3s;
+        }
+
+        .content-area {
+            flex: 1;
+            background: var(--panel-bg);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            min-height: 70vh;
+        }
+
+        .typing-text {
+            line-height: 1.6;
+            min-height: 100px;
+        }
+
+        .options {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .option-btn {
+            background: var(--secondary-color);
+            padding: 12px;
+            text-align: center;
+            border-radius: 10px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .status-panel {
+                position: static;
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="status-panel">
-        <h2>角色状态</h2>
-        <div class="status-item">人品值: <span id="rpValue">-</span></div>
-        <div class="status-item">码力值: <span id="mlValue">-</span></div>
-        <div class="status-item">好感度: <span id="hgValue">-</span></div>
-        <div class="status-item">心情值: <span id="xqValue">-</span></div>
-        <div class="status-item">坚持天数: <span id="dayValue">-</span></div>
-        <div class="status-item">级别: <span id="jbValue">-</span></div>
+    <div class="header">
+        <h1>OI的成长之路</h1>
+        <div class="game-controls">
+            <button id="newGameBtn">新游戏</button>
+            <button id="saveLoadBtn">保存/加载</button>
+        </div>
     </div>
-    
-    <div class="game-area">
-        <div class="header">
-            <h1>OI的成长之路</h1>
-            <p>制作者：王平(绿树公司)</p>
+
+    <div class="container">
+        <div class="status-panel">
+            <h2>状态面板</h2>
+            <div class="status-item">
+                <h3>姓名</h3>
+                <div id="playerName">未设置</div>
+            </div>
+            <div class="status-item">
+                <h3>人品值 <span id="rpValue">0</span></h3>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="rpBar" style="width: 0%"></div>
+                </div>
+            </div>
+            <div class="status-item">
+                <h3>码力值 <span id="mlValue">0</span></h3>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="mlBar" style="width: 0%"></div>
+                </div>
+            </div>
+            <div class="status-item">
+                <h3>好感度 <span id="hgValue">0</span></h3>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="hgBar" style="width: 0%"></div>
+                </div>
+            </div>
+            <div class="status-item">
+                <h3>心情值 <span id="xqValue">100</span></h3>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="xqBar" style="width: 100%"></div>
+                </div>
+            </div>
+            <div class="status-item">
+                <h3>坚持天数 <span id="dayValue">0</span></h3>
+            </div>
+            <div class="status-item">
+                <h3>级别 <span id="jbValue">1</span></h3>
+            </div>
         </div>
-        
-        <div id="loadingScreen" class="loading-bar">
-            <div class="loading-progress"></div>
-        </div>
-        
-        <div class="loading-text">正在加载游戏...</div>
-        
-        <div id="gameContent" class="hidden">
-            <div id="dialogBox" class="dialog"></div>
-            
-            <div class="input-area" id="nameInputArea">
-                <input type="text" id="playerName" placeholder="请输入你的名字">
-                <button onclick="confirmName()">确定</button>
+
+        <div class="content-area">
+            <div id="content" class="typing-text">
+                欢迎来到OI的成长之路！请点击"新游戏"开始你的旅程。
             </div>
-            
-            <div id="actionPanel" class="action-panel hidden">
-                <h2>今日行动</h2>
-                <ul class="action-list">
-                    <li><button onclick="goToSchool()">1. 去师大附中</button></li>
-                    <li><button onclick="参加模拟赛()">2. 参加模拟赛</button></li>
-                    <li><button onclick="goToTraining()">3. 去集训</button></li>
-                    <li><button onclick="参加NOIP()">4. 去参加NOIP比赛</button></li>
-                    <li><button onclick="参加NOI()">5. 去参加NOI比赛</button></li>
-                    <li><button onclick="参加IOI()">6. 参加IOI比赛</button></li>
-                    <li><button onclick="stayHome()">7. 在家里颓废</button></li>
-                    <li><button onclick="openWeb()">8. 打开网页浏览</button></li>
-                    <li><button onclick="exitGame()">9. 退出游戏</button></li>
-                </ul>
-            </div>
-            
-            <div id="schoolActions" class="action-panel hidden">
-                <h2>在学校</h2>
-                <ul class="action-list">
-                    <li><button onclick="attendClass()">认真听讲</button></li>
-                    <li><button onclick="distractClass()">不认真听讲</button></li>
-                </ul>
-            </div>
-            
-            <div id="distractionOptions" class="action-panel hidden">
-                <h2>你要做什么？</h2>
-                <ul class="action-list">
-                    <li><button onclick="readNovel()">看小说</button></li>
-                    <li><button onclick="watchVideo()">看视频</button></li>
-                    <li><button onclick="playGame()">打游戏</button></li>
-                    <li><button onclick="writeGame()">写游戏</button></li>
-                </ul>
-            </div>
-            
-            <div id="afterExamOptions" class="action-panel hidden">
-                <h2>你要做什么？</h2>
-                <ul class="action-list">
-                    <li><button onclick="brushQuestions()">刷题</button></li>
-                    <li><button onclick="takeANap()">睡觉</button></li>
-                    <li><button onclick="playGameAfterExam()">打游戏</button></li>
-                </ul>
-            </div>
-            
-            <div id="problemSolvingOptions" class="action-panel hidden">
-                <h2>遇到难题</h2>
-                <ul class="action-list">
-                    <li><button onclick="searchOnline()">在网上找代码</button></li>
-                    <li><button onclick="thinkByYourself()">自己思考</button></li>
-                </ul>
-            </div>
-            
-            <div id="webOptions" class="action-panel hidden">
-                <h2>打开网页</h2>
-                <ul class="action-list">
-                    <li><button onclick="openWebsite(1)">1. 百度</button></li>
-                    <li><button onclick="openWebsite(2)">2. ACCoders</button></li>
-                    <li><button onclick="openWebsite(3)">3. DBSDFZOJ</button></li>
-                    <li><button onclick="openWebsite(4)">4. 东师附中OI</button></li>
-                    <li><button onclick="openWebsite(5)">5. 4399小游戏</button></li>
-                    <li><button onclick="openWebsite(6)">6. 洛谷</button></li>
-                    <li><button onclick="openWebsite(7)">7. 百度翻译</button></li>
-                    <li><button onclick="openWebsite(8)">8. 东师附中 OJ</button></li>
-                </ul>
-            </div>
-            
-            <div id="trainingConfirmation" class="action-panel hidden">
-                <h2>集训报名</h2>
-                <ul class="action-list">
-                    <li><button onclick="joinTraining()">1. 报名</button></li>
-                    <li><button onclick="cancelTraining()">2. 不报名</button></li>
-                </ul>
-            </div>
-            
-            <div id="examOptions" class="action-panel hidden">
-                <h2>考试选项</h2>
-                <ul class="action-list">
-                    <li><button onclick="chooseProblem(1)">做第一题</button></li>
-                    <li><button onclick="chooseProblem(2)">做第二题</button></li>
-                    <li><button onclick="chooseProblem(3)">做第三题</button></li>
-                    <li><button onclick="chooseProblem(4)">做第四题</button></li>
-                </ul>
-            </div>
-            
-            <div id="last30Minutes" class="action-panel hidden">
-                <h2>还剩30分钟</h2>
-                <ul class="action-list">
-                    <li><button onclick="submitSample()">输出样例数据</button></li>
-                    <li><button onclick="playGameLast()">打游戏</button></li>
-                    <li><button onclick="doNothing()">干坐着</button></li>
-                </ul>
-            </div>
-            
-            <div id="apologizeOptions" class="action-panel hidden">
-                <h2>你要做什么？</h2>
-                <ul class="action-list">
-                    <li><button onclick="apologize()">向老师认错</button></li>
-                    <li><button onclick="escapeClass()">逃进教室</button></li>
-                </ul>
+            <div id="options" class="options">
+                <!-- 选项将在这里动态生成 -->
             </div>
         </div>
     </div>
 
-    <div class="footer">
-        <p>© 2023 OI的成长之路 - 绿树公司</p>
+    <!-- 新游戏模态框 -->
+    <div id="newGameModal" class="modal">
+        <div class="modal-content">
+            <h2>创建新角色</h2>
+            <p>给你的人物起个名字吧！</p>
+            <input type="text" id="nameInput" placeholder="输入角色名" style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px;">
+            <div class="modal-actions">
+                <button id="cancelNewGame">取消</button>
+                <button id="confirmNewGame">确认</button>
+            </div>
+        </div>
     </div>
-    
-    <div class="game-controls">
-        <button onclick="saveGame()">保存游戏</button>
-        <button onclick="loadGame()">加载游戏</button>
-        <button onclick="exportGame()">导出游戏</button>
-        <button onclick="importGame()">导入游戏</button>
-        <button onclick="resetGame()">重开游戏</button>
+
+    <!-- 保存/加载模态框 -->
+    <div id="saveLoadModal" class="modal">
+        <div class="modal-content">
+            <h2>保存/加载游戏</h2>
+            <div>
+                <h3>保存当前游戏</h3>
+                <button id="saveGameBtn" style="width: 100%; margin-bottom: 10px;">保存游戏</button>
+                <textarea id="saveData" readonly style="width: 100%; height: 100px; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px;"></textarea>
+            </div>
+            <div>
+                <h3>加载游戏</h3>
+                <textarea id="loadData" placeholder="粘贴保存数据..." style="width: 100%; height: 100px; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px;"></textarea>
+                <button id="loadGameBtn" style="width: 100%;">加载游戏</button>
+            </div>
+            <div class="modal-actions">
+                <button id="closeSaveLoad">关闭</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        // 游戏变量
-        let RP = 0; // 人品值
-        let ML = 0; // 码力值
-        let HG = 0; // 好感度
-        let XQ = 100; // 心情值
-        let Day = 1; // 坚持天数
-        let JB = 1; // 级别
-        let name = ""; // 角色名字
-        let isAuthorMode = false; // 是否是作者模式
-        
+        // 游戏状态
+        const gameState = {
+            RP: 0,
+            ML: 0,
+            HG: 0,
+            XQ: 100,
+            JB: 1,
+            Day: 0,
+            name: "",
+            isCheatMode: false
+        };
+
         // DOM元素
-        let loadingScreen = document.getElementById('loadingScreen');
-        let gameContent = document.getElementById('gameContent');
-        let dialogBox = document.getElementById('dialogBox');
-        let nameInputArea = document.getElementById('nameInputArea');
-        let actionPanel = document.getElementById('actionPanel');
-        let schoolActions = document.getElementById('schoolActions');
-        let distractionOptions = document.getElementById('distractionOptions');
-        let afterExamOptions = document.getElementById('afterExamOptions');
-        let problemSolvingOptions = document.getElementById('problemSolvingOptions');
-        let webOptions = document.getElementById('webOptions');
-        let trainingConfirmation = document.getElementById('trainingConfirmation');
-        let examOptions = document.getElementById('examOptions');
-        let last30Minutes = document.getElementById('last30Minutes');
-        let apologizeOptions = document.getElementById('apologizeOptions');
-        
-        // 加载动画
-        let loadingInterval;
-        let loadingProgress = document.querySelector('.loading-progress');
-        let loadingText = document.querySelector('.loading-text');
-        let loadingPercent = 0;
-        
-        function startLoading() {
-            loadingInterval = setInterval(() => {
-                loadingPercent += 5;
-                if (loadingPercent >= 100) {
-                    clearInterval(loadingInterval);
-                    loadingProgress.style.width = '100%';
-                    loadingText.textContent = '加载完成';
-                    setTimeout(() => {
-                        loadingScreen.classList.add('hidden');
-                        gameContent.classList.remove('hidden');
-                        startGame();
-                    }, 1000);
-                } else {
-                    loadingProgress.style.width = loadingPercent + '%';
-                    loadingText.textContent = `正在加载 ${loadingPercent}%`;
+        const elements = {
+            content: document.getElementById('content'),
+            options: document.getElementById('options'),
+            playerName: document.getElementById('playerName'),
+            rpValue: document.getElementById('rpValue'),
+            rpBar: document.getElementById('rpBar'),
+            mlValue: document.getElementById('mlValue'),
+            mlBar: document.getElementById('mlBar'),
+            hgValue: document.getElementById('hgValue'),
+            hgBar: document.getElementById('hgBar'),
+            xqValue: document.getElementById('xqValue'),
+            xqBar: document.getElementById('xqBar'),
+            dayValue: document.getElementById('dayValue'),
+            jbValue: document.getElementById('jbValue'),
+            newGameBtn: document.getElementById('newGameBtn'),
+            saveLoadBtn: document.getElementById('saveLoadBtn'),
+            newGameModal: document.getElementById('newGameModal'),
+            saveLoadModal: document.getElementById('saveLoadModal'),
+            nameInput: document.getElementById('nameInput'),
+            confirmNewGame: document.getElementById('confirmNewGame'),
+            cancelNewGame: document.getElementById('cancelNewGame'),
+            saveGameBtn: document.getElementById('saveGameBtn'),
+            loadGameBtn: document.getElementById('loadGameBtn'),
+            saveData: document.getElementById('saveData'),
+            loadData: document.getElementById('loadData'),
+            closeSaveLoad: document.getElementById('closeSaveLoad')
+        };
+
+        // 初始化游戏
+        function initGame() {
+            // 尝试加载保存的游戏
+            const savedGame = localStorage.getItem('oiGrowthGame');
+            if (savedGame) {
+                try {
+                    const parsed = JSON.parse(savedGame);
+                    Object.assign(gameState, parsed);
+                    updateUI();
+                    showMainMenu();
+                } catch (e) {
+                    showNewGameModal();
                 }
-            }, 100);
-        }
-        
-        window.onload = startLoading;
-        
-        // 开始游戏
-        function startGame() {
-            showDialog("欢迎来到OI的成长之路\n制作者：王平(绿树公司)");
-            nameInputArea.style.display = 'block';
-            document.getElementById('playerName').focus();
-        }
-        
-        // 确定名字
-        function confirmName() {
-            name = document.getElementById('playerName').value.trim();
-            if (name) {
-                nameInputArea.style.display = 'none';
-                actionPanel.classList.remove('hidden');
-                showDialog("人物生成中......");
-                
-                // 模拟加载
-                setTimeout(() => {
-                    showDialog("给你的人物起个名字吧！");
-                    setTimeout(() => {
-                        if (isAuthorMode) {
-                            showDialog("已开启作者作弊模式！");
-                            // 作者模式奖励
-                            RP += 1000;
-                            ML += 1000;
-                            HG += 1000;
-                        } else {
-                            // 计算人品值
-                            for (let i = 0; i < name.length; i++) {
-                                RP += name.charCodeAt(i);
-                                RP %= 100;
-                            }
-                            ML += 3;
-                        }
-                        
-                        RP = Math.abs(RP);
-                        updateStatus();
-                        
-                        let intro = `自我介绍：我叫${name}，是一名蒟蒻，但我有一个理想——当一个大神犇！`;
-                        showDialog(intro);
-                        setTimeout(() => {
-                            // 开始游戏主循环
-                            gameLoop();
-                        }, 3000);
-                    }, 1000);
-                }, 1000);
             } else {
-                showDialog("请输入一个名字！");
+                showNewGameModal();
             }
         }
-        
-        // 更新状态面板
-        function updateStatus() {
-            document.getElementById('rpValue').textContent = RP;
-            document.getElementById('mlValue').textContent = ML;
-            document.getElementById('hgValue').textContent = HG;
-            document.getElementById('xqValue').textContent = XQ;
-            document.getElementById('dayValue').textContent = Day;
-            document.getElementById('jbValue').textContent = JB;
+
+        // 显示新游戏模态框
+        function showNewGameModal() {
+            elements.newGameModal.style.display = 'flex';
+            elements.nameInput.value = '';
+            elements.nameInput.focus();
         }
-        
-        // 显示对话
-        function showDialog(text, isSlow = false) {
-            dialogBox.textContent = text;
-            dialogBox.className = "dialog";
+
+        // 隐藏新游戏模态框
+        function hideNewGameModal() {
+            elements.newGameModal.style.display = 'none';
+        }
+
+        // 显示保存/加载模态框
+        function showSaveLoadModal() {
+            elements.saveLoadModal.style.display = 'flex';
+            elements.saveData.value = JSON.stringify(gameState);
+            elements.loadData.value = '';
+        }
+
+        // 隐藏保存/加载模态框
+        function hideSaveLoadModal() {
+            elements.saveLoadModal.style.display = 'none';
+        }
+
+        // 开始新游戏
+        function startNewGame(name) {
+            gameState.name = name;
+            gameState.RP = 0;
+            gameState.ML = 0;
+            gameState.HG = 0;
+            gameState.XQ = 100;
+            gameState.JB = 1;
+            gameState.Day = 0;
             
-            if (isSlow) {
-                dialogBox.classList.add('slow');
-                setTimeout(() => {
-                    dialogBox.classList.remove('slow');
-                }, text.length * 50);
-            }
-        }
-        
-        // 检查是否被清退
-        function checkExpulsion() {
-            if (RP < 0 || ML < 0 || HG < -30) {
-                showDialog("你因人品和码力值太低或好感度太低，被friendi清退！！");
-                setTimeout(() => {
-                    // 重置游戏
-                    RP = 0;
-                    ML = 0;
-                    HG = 0;
-                    XQ = 100;
-                    Day = 0;
-                    JB = 1;
-                    name = "";
-                    updateStatus();
-                    nameInputArea.style.display = 'block';
-                    actionPanel.classList.add('hidden');
-                    schoolActions.classList.add('hidden');
-                    distractionOptions.classList.add('hidden');
-                    afterExamOptions.classList.add('hidden');
-                    problemSolvingOptions.classList.add('hidden');
-                    webOptions.classList.add('hidden');
-                    trainingConfirmation.classList.add('hidden');
-                    examOptions.classList.add('hidden');
-                    last30Minutes.classList.add('hidden');
-                    apologizeOptions.classList.add('hidden');
-                }, 3000);
-            }
-        }
-        
-        // 游戏主循环
-        function gameLoop() {
-            actionPanel.classList.remove('hidden');
-            // 每次进入今日活动页面增加一天
-            function incrementDay() {
-                Day++;
-                checkLevelUp();
-                updateStatus();
-                checkExpulsion();
-                
-                let dayMessage = `第${Day}天开始了！`;
-                showDialog(dayMessage);
-            }            
-        }
-        
-        // 检查升级
-        function checkLevelUp() {
-            let levelDays = [10, 30, 60, 100, 150, 200, 300, 365, 400, 500];
-            for (let i = 0; i < levelDays.length; i++) {
-                if (Day === levelDays[i]) {
-                    JB++;
-                    let levelMessage = `恭喜你在OI的道路上坚持了${levelDays[i]}天，级别+1！`;
-                    showDialog(levelMessage);
-                    setTimeout(updateStatus, 2000);
-                    if (i === levelDays.length - 1 && Day === 365) {
-                        // 一年奖励
-                        RP += 10;
-                        ML += 10;
-                        XQ += 10;
-                        HG += 10;
-                        updateStatus();
-                    }
-                    break;
+            // 检查是否是作弊模式
+            const cheatNames = ["王平", "wangping", "Aranea", "晨曦", "yangmo", "杨默", "HuZHUNZHUN"];
+            gameState.isCheatMode = cheatNames.includes(name);
+            
+            if (gameState.isCheatMode) {
+                // 作弊模式 - 在UI中处理初始值设置
+                typeText("已开启作者作弊模式！\n请选择初始属性值。", () => {
+                    showCheatModeOptions();
+                });
+            } else {
+                // 普通模式 - 计算初始RP
+                for (let i = 0; i < name.length; i++) {
+                    gameState.RP += name.charCodeAt(i);
+                    gameState.RP %= 100;
                 }
+                gameState.RP = Math.abs(gameState.RP);
+                gameState.ML += 3;
+                
+                typeText(`\n自我介绍：我叫${name},是一名蒟蒻,但我有一个理想——当一个大神犇！\n`, () => {
+                    showMainMenu();
+                });
             }
             
-            if (Day >= 500 && Day % 150 === 0) {
-                JB++;
-                let levelMessage = `恭喜你在OI的道路上坚持了${Day}天，级别+1！`;
-                showDialog(levelMessage);
-                setTimeout(updateStatus, 2000);
+            updateUI();
+            saveGame();
+        }
+
+        // 显示作弊模式选项
+        function showCheatModeOptions() {
+            clearOptions();
+            
+            typeText("请问您要加多少码力值(≤1000)？", () => {
+                addOption("100", () => setCheatValue('ML', 100));
+                addOption("500", () => setCheatValue('ML', 500));
+                addOption("1000", () => setCheatValue('ML', 1000));
+            });
+        }
+
+        // 设置作弊值
+        function setCheatValue(stat, value) {
+            gameState[stat] = value;
+            updateUI();
+            
+            if (stat === 'ML') {
+                typeText(`码力值已设置为 ${value}。\n请问您要加多少人品值(≤1000)？`, () => {
+                    clearOptions();
+                    addOption("100", () => setCheatValue('RP', 100));
+                    addOption("500", () => setCheatValue('RP', 500));
+                    addOption("1000", () => setCheatValue('RP', 1000));
+                });
+            } else if (stat === 'RP') {
+                typeText(`人品值已设置为 ${value}。\n请问您要加多少好感度(≤1000)？`, () => {
+                    clearOptions();
+                    addOption("100", () => setCheatValue('HG', 100));
+                    addOption("500", () => setCheatValue('HG', 500));
+                    addOption("1000", () => setCheatValue('HG', 1000));
+                });
+            } else if (stat === 'HG') {
+                typeText(`好感度已设置为 ${value}。\n`, () => {
+                    typeText(`\n自我介绍：我叫${gameState.name},是一名蒟蒻,但我有一个理想——当一个大神犇！\n`, () => {
+                        showMainMenu();
+                    });
+                });
             }
         }
-        
-        // 去师大附中
-        function goToSchool() {
-            actionPanel.classList.add('hidden');
-            schoolActions.classList.remove('hidden');
-        }
-        
-        // 参加模拟赛
-        function 参加模拟赛() {
-            actionPanel.classList.add('hidden');
-            let random = Math.floor(Math.random() * 3) + 1;
-            if (random === 1) {
-                showDialog("今日没有模拟赛..");
-                setTimeout(() => {
-                    gameLoop();
-                }, 2000);
-            } else {
-                showDialog("今天的模拟赛好简单啊！so easy!");
-                setTimeout(() => {
-                    showDialog("你用了一半的时间就答完了题，AK!!");
-                    setTimeout(() => {
-                        showDialog("你想在剩下的一半时间做什么？");
-                        afterExamOptions.classList.remove('hidden');
-                    }, 2000);
-                }, 2000);
-            }
-        }
-        
-        // 去集训
-        function goToTraining() {
-            actionPanel.classList.add('hidden');
-            if (Day % 30 !== 10) {
-                showDialog("最近无集训");
-                setTimeout(() => {
-                    gameLoop();
-                }, 2000);
-            } else {
-                let jxt = Math.floor(Math.random() * 48) + 3;
-                let jxml = jxt * 3;
-                if (jxml >= 100) jxml *= 0.8;
-                showDialog(`本次集训为${jxt}天，训后可增加码力值${Math.floor(jxml)}哦，报名吗?`);
-                trainingConfirmation.classList.remove('hidden');
-            }
-        }
-        
-        // 参加NOIP比赛
-        function 参加NOIP() {
-            actionPanel.classList.add('hidden');
-            if (Day % 3 !== 2) {
-                showDialog("今日没有NOIP比赛");
-                setTimeout(() => {
-                    gameLoop();
-                }, 2000);
-            } else if (ML <= 60) {
-                showDialog("码力值不足....");
-                setTimeout(() => {
-                    gameLoop();
-                }, 2000);
-            } else {
-                showDialog("正在前往NOIP考场...");
-                setTimeout(() => {
-                    showDialog("欢迎进入考试现场----NOIP");
-                    setTimeout(() => {
-                        showDialog("请问你要先做哪题？");
-                        examOptions.classList.remove('hidden');
-                    }, 2000);
-                }, 2000);
-            }
-        }
-        
-        // 参加NOI比赛
-        function 参加NOI() {
-            actionPanel.classList.add('hidden');
-            if (Day % 5 !== 2) {
-                showDialog("今日没有NOI比赛");
-                setTimeout(() => {
-                    gameLoop();
-                }, 2000);
-            } else if (ML <= 150) {
-                showDialog("码力值不足....");
-                setTimeout(() => {
-                    gameLoop();
-                }, 2000);
-            } else {
-                showDialog("正在前往NOI考场...");
-                setTimeout(() => {
-                    showDialog("欢迎进入考试现场----NOI");
-                    setTimeout(() => {
-                        showDialog("考试开始...");
-                        // NOI考试逻辑
-                        setTimeout(() => {
-                            let score = Math.floor(Math.random() * 300) + 1;
-                            if (ML >= 350) score += 50;
-                            score = Math.min(score, 300);
-                            
-                            showDialog(`考试结束，你得了${score}分`);
-                            
-                            if (score === 0) {
-                                baoling();
-                            } else if (score <= 100) {
-                                showDialog("你得了铜牌");
-                                RP -= 2;
-                                ML += 5;
-                                XQ -= 2;
-                            } else if (score <= 200) {
-                                showDialog("你获得了银牌");
-                                RP -= 4;
-                                ML += 10;
-                                XQ += 2;
-                            } else if (score < 300) {
-                                showDialog("你获得了金牌");
-                                RP += 1;
-                                ML += 20;
-                                XQ += 10;
-                            } else {
-                                showDialog("你AK了，第一名");
-                                RP += 5;
-                                ML += 30;
-                                XQ += 20;
-                            }
-                            
-                            updateStatus();
-                            setTimeout(() => {
-                                gameLoop();
-                            }, 3000);
-                        }, 3000);
-                    }, 2000);
-                }, 2000);
-            }
-        }
-        
-        // 参加IOI比赛
-        function 参加IOI() {
-            actionPanel.classList.add('hidden');
-            if (Day % 10 !== 4) {
-                showDialog("今日没有IOI比赛");
-                setTimeout(() => {
-                    gameLoop();
-                }, 2000);
-            } else if (ML <= 300) {
-                showDialog("码力值不足....");
-                setTimeout(() => {
-                    gameLoop();
-                }, 2000);
-            } else {
-                showDialog("正在前往IOI考场...");
-                setTimeout(() => {
-                    showDialog("欢迎进入考试现场----IOI");
-                    setTimeout(() => {
-                        showDialog("考试开始...");
-                        // IOI考试逻辑
-                        setTimeout(() => {
-                            let score = 0;
-                            for (let i = 1; i <= 3; i++) {
-                                showDialog(`正在做第${i}题...`);
-                                if (i === 1) {
-                                    if (ML >= 600) {
-                                        score += 100;
-                                        showDialog("AC通过！");
-                                    } else {
-                                        let ms = Math.floor(Math.random() * 50) + 11;
-                                        if (ML >= 500) ms += 40;
-                                        score += ms;
-                                        showDialog(`得了${ms}分`);
-                                    }
-                                } else if (i === 2) {
-                                    showDialog("这就是一道简单的最短路径问题嘛!!");
-                                    showDialog("数据这么小，Floyd就可以解决!");
-                                    if (ML >= 600) {
-                                        score += 100;
-                                        showDialog("AC通过！");
-                                    } else {
-                                        let ms = Math.floor(Math.random() * 50) + 11;
-                                        if (ML >= 500) ms += 40;
-                                        score += ms;
-                                        showDialog(`得了${ms}分`);
-                                    }
-                                } else {
-                                    showDialog("这太难了!!");
-                                    showDialog("还剩30分钟，请问你要做什么？？");
-                                    last30Minutes.classList.remove('hidden');
-                                }
-                                if (i < 3) {
-                                    setTimeout(() => {}, 2000);
-                                }
-                            }
-                            
-                            showDialog(`总分：${score}分`);
-                            if (score === 0) {
-                                baoling();
-                            } else if (score <= 100) {
-                                showDialog("你得了铜牌");
-                                RP -= 2;
-                                ML += 10;
-                                XQ += 1;
-                            } else if (score <= 200) {
-                                showDialog("你获得了银牌");
-                                RP -= 4;
-                                ML += 20;
-                                XQ += 5;
-                            } else if (score < 300) {
-                                showDialog("你获得了金牌");
-                                RP += 1;
-                                ML += 30;
-                                XQ += 20;
-                            } else {
-                                showDialog("你AK了，第一名");
-                                RP += 5;
-                                ML += 35;
-                                XQ += 40;
-                            }
-                            
-                            updateStatus();
-                            setTimeout(() => {
-                                gameLoop();
-                            }, 3000);
-                        }, 3000);
-                    }, 2000);
-                }, 2000);
-            }
-        }
-        
-        // 在家颓废
-        function stayHome() {
-            actionPanel.classList.add('hidden');
-            showDialog("在家颓废了一天，码力值-10，心情+10，人品值-10");
-            ML -= 10;
-            XQ += 10;
-            RP -= 10;
-            updateStatus();
-            setTimeout(() => {
-                gameLoop();
-            }, 3000);
-        }
-        
-        // 打开网页
-        function openWeb() {
-            actionPanel.classList.add('hidden');
-            showDialog("即将为你打开网页...");
-            setTimeout(() => {
-                webOptions.classList.remove('hidden');
-            }, 2000);
-        }
-        
-        // 打开指定网站
-        function openWebsite(siteId) {
-            let urls = [
-                'https://www.baidu.com', 
-                'https://www.accoders.com', 
-                'http://218.62.22.209:8080', 
-                'http://msannuoi.com', 
-                'https://www.4399.com', 
-                'https://www.luogu.com.cn', 
-                'https://fanyi.baidu.com', 
-                'https://hydro.ac/d/wangping/'
-            ];
-            if (siteId >= 1 && siteId <= 8) {
-                showDialog(`正在打开 ${urls[siteId-1]}`);
-                // 实际游戏中这里会打开新标签页
-                // window.open(urls[siteId-1], '_blank');
-                setTimeout(() => {
-                    webOptions.classList.add('hidden');
-                    gameLoop();
-                }, 2000);
-            }
-        }
-        
-        // 退出游戏
-        function exitGame() {
-            if (confirm("确定要退出游戏吗？")) {
-                // 重置游戏
-                RP = 0;
-                ML = 0;
-                HG = 0;
-                XQ = 100;
-                Day = 0;
-                JB = 1;
-                name = "";
-                updateStatus();
-                nameInputArea.style.display = 'block';
-                actionPanel.classList.add('hidden');
-                schoolActions.classList.add('hidden');
-                distractionOptions.classList.add('hidden');
-                afterExamOptions.classList.add('hidden');
-                problemSolvingOptions.classList.add('hidden');
-                webOptions.classList.add('hidden');
-                trainingConfirmation.classList.add('hidden');
-                examOptions.classList.add('hidden');
-                last30Minutes.classList.add('hidden');
-                apologizeOptions.classList.add('hidden');
-            }
-        }
-        
-        // 认真听讲
-        function attendClass() {
-            schoolActions.classList.add('hidden');
-            showDialog("你认认真真的听完了课，感觉自已更NB了！");
-            RP += 5;
-            ML += 5;
-            HG += 2;
-            XQ -= 2;
-            updateStatus();
-            setTimeout(() => {
-                gameLoop();
-            }, 3000);
-        }
-        
-        // 不认真听讲
-        function distractClass() {
-            schoolActions.classList.add('hidden');
-            showDialog("那你要做什么？");
-            distractionOptions.classList.remove('hidden');
-        }
-        
-        // 看小说
-        function readNovel() {
-            distractionOptions.classList.add('hidden');
-            let random = Math.floor(Math.random() * 2) + 1;
-            if (random === 1) {
-                showDialog("你真幸运，没被friendi发现！");
-                RP -= 5;
-                ML -= 2;
-                XQ += 2;
-            } else {
-                showDialog("Oh，No... 有人拍了拍你的肩膀");
-                showDialog("friendi看到了你在看小说！");
-                RP -= 5;
-                ML -= 2;
-                XQ -= 5;
-                HG -= 10;
-            }
-            updateStatus();
-            setTimeout(() => {
-                gameLoop();
-            }, 3000);
-        }
-        
-        // 看视频
-        function watchVideo() {
-            distractionOptions.classList.add('hidden');
-            let random = Math.floor(Math.random() * 2) + 1;
-            if (random === 1) {
-                showDialog("你真幸运，没被friendi发现！");
-                RP -= 5;
-                ML -= 2;
-                XQ += 2;
-            } else {
-                showDialog("Oh，No... 有人拍了拍你的肩膀");
-                showDialog("friendi看到了你在看视频！");
-                RP -= 5;
-                ML -= 2;
-                XQ -= 5;
-                HG -= 10;
-            }
-            updateStatus();
-            setTimeout(() => {
-                gameLoop();
-            }, 3000);
-        }
-        
-        // 打游戏
-        function playGame() {
-            distractionOptions.classList.add('hidden');
-            let random = Math.floor(Math.random() * 3) + 1;
-            if (random === 1) {
-                showDialog("你真幸运，没被friendi发现！");
-                RP -= 5;
-                ML -= 2;
-                XQ += 2;
-            } else {
-                showDialog("Oh，No... 有人拍了拍你的肩膀");
-                showDialog("friendi看到了你在玩游戏！");
-                RP -= 5;
-                ML -= 2;
-                XQ -= 2;
-                HG -= 5;
-            }
-            updateStatus();
-            setTimeout(() => {
-                gameLoop();
-            }, 3000);
-        }
-        
-        // 写游戏
-        function writeGame() {
-            distractionOptions.classList.add('hidden');
-            let random = Math.floor(Math.random() * 2) + 1;
-            if (random === 1) {
-                showDialog("你真幸运，没被friendi发现！");
-                RP -= 5;
-                ML += 2;
-                XQ += 2;
-            } else {
-                showDialog("friendi走了进来，看到你正在打代码.......");
-                let randomResponse = Math.floor(Math.random() * 2) + 1;
-                if (randomResponse === 1) {
-                    showDialog("friendi以为你正在做题，所以摸了摸你的小脑袋");
-                    RP -= 5;
-                    ML += 3;
-                    HG += 1;
-                    XQ += 5;
-                } else {
-                    showDialog("friendi看出了你正在写游戏的代码");
-                    showDialog("friendi十分生气，把你批了一顿！");
-                    RP -= 5;
-                    ML += 3;
-                    HG -= 5;
-                    XQ -= 4;
-                }
-            }
-            updateStatus();
-            setTimeout(() => {
-                gameLoop();
-            }, 3000);
-        }
-        
-        // 考试后选项
-        function brushQuestions() {
-            afterExamOptions.classList.add('hidden');
-            let random = Math.floor(Math.random() * 2) + 1;
-            if (random === 1) {
-                showDialog("啊啊.. 遇到难题！");
-                showDialog("你要怎么办？");
-                problemSolvingOptions.classList.remove('hidden');
-            } else {
-                showDialog("题真简单...");
-                showDialog("friendi走了进来，看到了你在敲代码，摸了摸你的小脑袋");
-                RP += 10;
-                ML += 5;
-                HG += 10;
-                XQ += 5;
-                updateStatus();
-                setTimeout(() => {
-                    gameLoop();
-                }, 3000);
-            }
-        }
-        
-        // 睡觉
-        function takeANap() {
-            afterExamOptions.classList.add('hidden');
-            let random = Math.floor(Math.random() * 2) + 1;
-            if (random === 1) {
-                showDialog("你真幸运，没被老师发现！");
-                RP -= 5;
-                XQ += 2;
-            } else {
-                showDialog("friendi走了进来，看到你在大睡，十分生气，狠狠地批了你一顿！");
-                RP -= 5;
-                XQ -= 2;
-                HG -= 5;
-            }
-            updateStatus();
-            setTimeout(() => {
-                gameLoop();
-            }, 3000);
-        }
-        
-        // 考试后打游戏
-        function playGameAfterExam() {
-            afterExamOptions.classList.add('hidden');
-            let random = Math.floor(Math.random() * 2) + 1;
-            if (random === 1) {
-                showDialog("你真幸运，没被老师发现！");
-                RP -= 5;
-                XQ += 2;
-            } else {
-                showDialog("friendi走了进来，看到你在玩游戏，十分生气，狠狠地批了你一顿！");
-                RP -= 5;
-                XQ -= 2;
-                HG -= 5;
-            }
-            updateStatus();
-            setTimeout(() => {
-                gameLoop();
-            }, 3000);
-        }
-        
-        // 在线搜索解题方法
-        function searchOnline() {
-            problemSolvingOptions.classList.add('hidden');
-            let random = Math.floor(Math.random() * 4);
-            if (random >= 1 && random <= 3) {
-                showDialog("Oh，No... 有人拍了拍你的肩膀");
-                showDialog("friendi看到了你在查资料！");
-                RP -= 10;
-                HG -= 10;
-                XQ -= 10;
-            } else {
-                showDialog("你真幸运，没被老师发现！");
-                RP -= 5;
-                XQ += 2;
-            }
-            updateStatus();
-            setTimeout(() => {
-                gameLoop();
-            }, 3000);
-        }
-        
-        // 自己思考解题
-        function thinkByYourself() {
-            problemSolvingOptions.classList.add('hidden');
-            showDialog("friendi走了进来，看到你在认真思考，摸了摸你的小脑袋");
-            RP += 10;
-            ML += 5;
-            HG += 10;
-            XQ += 5;
-            updateStatus();
-            setTimeout(() => {
-                gameLoop();
-            }, 3000);
-        }
-        
-        // 集训报名
-        function joinTraining() {
-            trainingConfirmation.classList.add('hidden');
-            let jxt = Math.floor(Math.random() * 48) + 3;
-            let jxml = jxt * 3;
-            if (jxml >= 100) jxml *= 0.8;
-            Day += jxt;
-            ML += Math.floor(jxml);
-            XQ -= 10;
-            showDialog(`集训完成，你感觉自己更NB了。`);
-            updateStatus();
-            setTimeout(() => {
-                gameLoop();
-            }, 3000);
-        }
-        
-        // 取消集训
-        function cancelTraining() {
-            trainingConfirmation.classList.add('hidden');
-            gameLoop();
-        }
-        
-        // 选择题目
-        function chooseProblem(problemId) {
-            examOptions.classList.add('hidden');
-            if (problemId === 1) {
-                showDialog("这道题是简单的字符串");
-                showDialog("话不多说，10分钟搞定！");
-                showDialog("AC");
-                // 增加码力值
-                ML += 10;
-                updateStatus();
-            } else if (problemId === 2) {
-                showDialog("第二题是深搜");
-                showDialog("你会吗？");
-                setTimeout(() => {
-                    showDialog("1. 会\n2. 不会");
-                    setTimeout(() => {
-                        let random = Math.floor(Math.random() * 2) + 1;
-                        if (random === 1) {
-                            showDialog("那我就考考你（深搜输出全排列）");
-                            showDialog("请输入答案：");
-                            // 模拟用户输入正确答案
-                            setTimeout(() => {
-                                showDialog("看来你是真会深搜！");
-                                showDialog("得了30分");
-                                ML += 30;
-                                updateStatus();
-                            }, 2000);
-                        } else {
-                            showDialog("噢噢噢噢....");
-                        }
-                    }, 2000);
-                }, 2000);
-            } else if (problemId === 3) {
-                if (ML >= 200) {
-                    showDialog("第三题会");
-                    showDialog("打代码中......");
-                    showDialog("得了60分");
-                    ML += 60;
-                    updateStatus();
-                } else {
-                    showDialog("后面的题都不会");
-                }
-            } else if (problemId === 4) {
-                if (ML >= 320) {
-                    showDialog("第四题会");
-                    showDialog("打代码中......");
-                    showDialog("得了40分");
-                    ML += 40;
-                    updateStatus();
-                } else {
-                    showDialog("不会啊！");
-                }
-            }
-            setTimeout(() => {
-                gameLoop();
-            }, 5000);
-        }
-        
-        // 最后30分钟选择
-        function submitSample() {
-            last30Minutes.classList.add('hidden');
-            let random = Math.floor(Math.random() * 10) + 1;
-            if (ML >= 600) random += 10;
-            showDialog(`你得了${random}分`);
-            setTimeout(() => {
-                gameLoop();
-            }, 2000);
-        }
-        
-        function playGameLast() {
-            last30Minutes.classList.add('hidden');
-            let random = Math.floor(Math.random() * 2) + 1;
-            if (random === 1) {
-                showDialog("你真幸运，没被考官发现！");
-                RP -= 5;
-                XQ += 2;
-            } else {
-                showDialog("考官走了进来，看到你在玩游戏，十分生气，把你请出考场！");
-                RP -= 5;
-                XQ -= 2;
-            }
-            updateStatus();
-            setTimeout(() => {
-                gameLoop();
-            }, 3000);
-        }
-        
-        function doNothing() {
-            last30Minutes.classList.add('hidden');
-            gameLoop();
-        }
-        
-        // 迟到后选择
-        function apologize() {
-            apologizeOptions.classList.add('hidden');
-            showDialog("friendi表扬你是一个知错就改的好OIER");
-            RP += 5;
-            HG += 5;
-            XQ += 5;
-            updateStatus();
-            setTimeout(() => {
-                gameLoop();
-            }, 3000);
-        }
-        
-        function escapeClass() {
-            apologizeOptions.classList.add('hidden');
-            let random = Math.floor(Math.random() * 2) + 1;
-            if (random === 1) {
-                showDialog("你被friendi碰了个正着，friendi狠狠地批了你一顿！");
-                RP -= 5;
-                HG -= 5;
-                XQ -= 5;
-            } else {
-                showDialog("你竟然没遇到friendi！");
-                showDialog("你溜回了座位，沾沾自喜起来！");
-                RP -= 5;
-                XQ += 2;
-            }
-            updateStatus();
-            setTimeout(() => {
-                gameLoop();
-            }, 3000);
-        }
-        
-        // 爆零剧情
-        function baoling() {
-            showDialog("考试结束了");
-            setTimeout(() => {
-                showDialog("你满怀期待地点开来查看分数的网站，从前往后开始浏览每个人的编号和名字。");
-                setTimeout(() => {
-                    showDialog("大神1...大神2...大神3... ... ... ... ...");
-                    setTimeout(() => {
-                        showDialog("找了好久好久，终于在列表的最底端找到了");
-                        setTimeout(() => {
-                            showDialog(`${name}的。`);
-                            setTimeout(() => {
-                                showDialog("不对不对，我不可能爆零，应该是重名！");
-                                setTimeout(() => {
-                                    showDialog("你核对了学校——没问题");
-                                    setTimeout(() => {
-                                        showDialog("地区——没问题");
-                                        setTimeout(() => {
-                                            showDialog("考号——必须有问题——");
-                                            setTimeout(() => {
-                                                showDialog("没问题...");
-                                                setTimeout(() => {
-                                                    showDialog("啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊！！！");
-                                                    setTimeout(() => {
-                                                        showDialog("你不得不学着面对这样一个事实：");
-                                                        setTimeout(() => {
-                                                            showDialog("你爆零了。");
-                                                            setTimeout(() => {
-                                                                for (let i = 1; i <= 5; i++) {
-                                                                    setTimeout(() => {
-                                                                        showDialog("你爆零了。");
-                                                                    }, i * 1000);
-                                                                }
-                                                                setTimeout(() => {
-                                                                    showDialog("你看了一遍题和自己的代码，突然发现你本来可以打");
-                                                                    let retg = Math.floor(Math.random() * 100) + 1;
-                                                                    if (ML >= 400) ML += 50;
-                                                                    if (ML >= 550) ML += 50;
-                                                                    if (ML >= 700) ML += 70;
-                                                                    showDialog(`${retg}分的...`);
-                                                                    showDialog("于是，你自闭了.");
-                                                                    RP -= 4;
-                                                                    XQ -= 10;
-                                                                    updateStatus();
-                                                                    setTimeout(() => {
-                                                                        gameLoop();
-                                                                    }, 3000);
-                                                                }, 7000);
-                                                            }, 2000);
-                                                        }, 2000);
-                                                    }, 2000);
-                                                }, 2000);
-                                            }, 2000);
-                                        }, 2000);
-                                    }, 2000);
-                                }, 2000);
-                            }, 2000);
-                        }, 2000);
-                    }, 2000);
-                }, 2000);
-            }, 2000);
-        }
-        
+
         // 保存游戏
         function saveGame() {
-            let saveData = {
-                RP: RP,
-                ML: ML,
-                HG: HG,
-                XQ: XQ,
-                Day: Day,
-                JB: JB,
-                name: name
-            };
-            
-            localStorage.setItem('oiGameSave', JSON.stringify(saveData));
-            showDialog("游戏已保存！");
+            localStorage.setItem('oiGrowthGame', JSON.stringify(gameState));
         }
-        
+
         // 加载游戏
-        function loadGame() {
-            let saveData = localStorage.getItem('oiGameSave');
-            if (saveData) {
-                saveData = JSON.parse(saveData);
-                RP = saveData.RP;
-                ML = saveData.ML;
-                HG = saveData.HG;
-                XQ = saveData.XQ;
-                Day = saveData.Day;
-                JB = saveData.JB;
-                name = saveData.name;
-                updateStatus();
-                showDialog("游戏加载成功！");
-            } else {
-                showDialog("没有找到存档！");
+        function loadGame(data) {
+            try {
+                const parsed = JSON.parse(data);
+                Object.assign(gameState, parsed);
+                updateUI();
+                showMainMenu();
+                saveGame();
+                return true;
+            } catch (e) {
+                return false;
             }
         }
-        
-        // 导出游戏
-        function exportGame() {
-            let saveData = {
-                RP: RP,
-                ML: ML,
-                HG: HG,
-                XQ: XQ,
-                Day: Day,
-                JB: JB,
-                name: name
-            };
+
+        // 更新UI
+        function updateUI() {
+            elements.playerName.textContent = gameState.name || "未设置";
+            elements.rpValue.textContent = gameState.RP;
+            elements.rpBar.style.width = `${Math.min(100, gameState.RP)}%`;
+            elements.mlValue.textContent = gameState.ML;
+            elements.mlBar.style.width = `${Math.min(100, gameState.ML / 10)}%`;
+            elements.hgValue.textContent = gameState.HG;
+            elements.hgBar.style.width = `${Math.min(100, gameState.HG)}%`;
+            elements.xqValue.textContent = gameState.XQ;
+            elements.xqBar.style.width = `${Math.min(100, gameState.XQ)}%`;
+            elements.dayValue.textContent = gameState.Day;
+            elements.jbValue.textContent = gameState.JB;
+        }
+
+        // 打字机效果显示文本
+        function typeText(text, callback) {
+            let i = 0;
+            elements.content.innerHTML = '';
             
-            let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(saveData));
-            let downloadAnchor = document.createElement("a");
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", "oi_game_save.json");
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            document.body.removeChild(downloadAnchor);
-            showDialog("游戏已导出为 oi_game_save.json 文件！");
-        }
-        
-        // 导入游戏
-        function importGame() {
-            let input = document.createElement("input");
-            input.type = "file";
-            input.accept = ".json";
-            input.onchange = function(e) {
-                let file = e.target.files[0];
-                if (file) {
-                    let reader = new FileReader();
-                    reader.onload = function(event) {
-                        try {
-                            let saveData = JSON.parse(event.target.result);
-                            RP = saveData.RP || 0;
-                            ML = saveData.ML || 0;
-                            HG = saveData.HG || 0;
-                            XQ = saveData.XQ || 100;
-                            Day = saveData.Day || 0;
-                            JB = saveData.JB || 1;
-                            name = saveData.name || "";
-                            updateStatus();
-                            showDialog("游戏导入成功！");
-                        } catch (e) {
-                            showDialog("导入失败，文件格式不正确！");
-                        }
-                    };
-                    reader.readAsText(file);
+            function typing() {
+                if (i < text.length) {
+                    elements.content.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(typing, 30);
+                } else if (callback) {
+                    callback();
                 }
-            };
-            document.body.appendChild(input);
-            input.click();
-            document.body.removeChild(input);
+            }
+            
+            typing();
         }
-        
-        // 重开游戏
-        function resetGame() {
-            if (confirm("确定要重开游戏吗？这将重置所有进度！")) {
-                RP = 0;
-                ML = 0;
-                HG = 0;
-                XQ = 100;
-                Day = 0;
-                JB = 1;
-                name = "";
-                updateStatus();
-                showDialog("游戏已重开！");
-                nameInputArea.style.display = 'block';
-                actionPanel.classList.add('hidden');
-                schoolActions.classList.add('hidden');
-                distractionOptions.classList.add('hidden');
-                afterExamOptions.classList.add('hidden');
-                problemSolvingOptions.classList.add('hidden');
-                webOptions.classList.add('hidden');
-                trainingConfirmation.classList.add('hidden');
-                examOptions.classList.add('hidden');
-                last30Minutes.classList.add('hidden');
-                apologizeOptions.classList.add('hidden');
+
+        // 添加选项按钮
+        function addOption(text, callback) {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.textContent = text;
+            btn.addEventListener('click', callback);
+            elements.options.appendChild(btn);
+        }
+
+        // 清除所有选项
+        function clearOptions() {
+            elements.options.innerHTML = '';
+        }
+
+        // 显示主菜单
+        function showMainMenu() {
+            checkGameOver();
+            
+            // 更新天数并检查级别提升
+            gameState.Day++;
+            checkLevelUp();
+            
+            typeText(`第 ${gameState.Day} 天，请问你要做什么？`, () => {
+                clearOptions();
+                addOption("去师大附中", () => shidafuzhong());
+                addOption("参加模拟赛", () => checkMonisai());
+                addOption("去集训", () => checkJixun());
+                addOption("参加NOIP比赛", () => checkNOIP());
+                addOption("参加NOI比赛", () => checkNOI());
+                addOption("参加IOI比赛", () => checkIOI());
+                addOption("在家里颓废", () => {
+                    gameState.ML -= 10;
+                    gameState.XQ += 10;
+                    gameState.RP -= 10;
+                    updateUI();
+                    typeText("在家颓废了一天，码力值-10，心情+10，人品值-10", () => {
+                        showMainMenu();
+                    });
+                });
+                addOption("打开网页浏览", () => openfile());
+            });
+            
+            updateUI();
+            saveGame();
+        }
+
+        // 检查游戏是否结束
+        function checkGameOver() {
+            if (gameState.RP < 0 || gameState.ML < 0 || gameState.HG < -30) {
+                typeText("\n你因人品和码力值太低或好感度太低，被friendi清退！！", () => {
+                    clearOptions();
+                    addOption("重新开始", () => {
+                        localStorage.removeItem('oiGrowthGame');
+                        showNewGameModal();
+                    });
+                });
+                return true;
+            }
+            return false;
+        }
+
+        // 检查级别提升
+        function checkLevelUp() {
+            const levelUpDays = [10, 30, 60, 100, 150, 200, 250, 300, 365, 400, 500];
+            const newLevel = levelUpDays.filter(day => gameState.Day >= day).length + 1;
+            
+            if (newLevel > gameState.JB) {
+                gameState.JB = newLevel;
+                if (gameState.Day === 365) {
+                    gameState.RP += 10;
+                    gameState.ML += 10;
+                    gameState.XQ += 10;
+                    gameState.HG += 10;
+                    typeText("恭喜您坚持1年，获得彩蛋1枚！\n人品值+10，码力值+10，心情+10，好感度+10，级别+10", () => {
+                        updateUI();
+                    });
+                } else {
+                    typeText(`您已在OI的道路上坚持了${gameState.Day}天，级别+1`, () => {
+                        updateUI();
+                    });
+                }
             }
         }
+
+        // 师大附中剧情
+        function shidafuzhong() {
+            if (gameState.Day % 7 === 6) {
+                // 星期六，有模拟赛
+                typeText("今天是星期六，有模拟赛！！", () => {
+                    const isLate = Math.random() < 0.5;
+                    if (isLate) {
+                        typeText("你堵车了，迟到了3分钟！\n于是你要：", () => {
+                            clearOptions();
+                            addOption("向老师认错", () => {
+                                gameState.RP += 5;
+                                gameState.HG += 5;
+                                gameState.XQ += 5;
+                                updateUI();
+                                typeText("friendi表扬你是一个知错就改的好OIER\n人品值+5，好感度+5，心情值+5", () => {
+                                    handleMonisai();
+                                });
+                            });
+                            addOption("鬼刀一开看不见，逃进教室！", () => {
+                                const caught = Math.random() < 0.5;
+                                if (caught) {
+                                    gameState.RP -= 5;
+                                    gameState.HG -= 5;
+                                    gameState.XQ -= 5;
+                                    typeText("你被friendi碰了个正着，friendi狠狠地批了你一顿！\n人品值-5，好感度-5，心情值-5", () => {
+                                        handleMonisai();
+                                    });
+                                } else {
+                                    gameState.RP -= 5;
+                                    gameState.XQ += 2;
+                                    typeText("你竟然没遇到friendi！\n你溜回了座位，沾沾自喜起来！\n人品值-5，心情值+2", () => {
+                                        handleMonisai();
+                                    });
+                                }
+                                updateUI();
+                            });
+                        });
+                    } else {
+                        handleMonisai();
+                    }
+                });
+            } else {
+                // 平常上课日
+                typeText("老师开始讲课了，你要认真听讲吗？", () => {
+                    clearOptions();
+                    addOption("认真听讲", () => {
+                        gameState.RP += 5;
+                        gameState.ML += 5;
+                        gameState.HG += 2;
+                        gameState.XQ -= 2;
+                        updateUI();
+                        typeText("你认认真真的听完了课，感觉自已更NB了！\n人品值+5，码力值+5，好感度+2，心情值-2", () => {
+                            showMainMenu();
+                        });
+                    });
+                    addOption("不认真听讲", () => {
+                        typeText("那你要做什么？", () => {
+                            clearOptions();
+                            addOption("看小说", () => handleDistraction("小说"));
+                            addOption("看视频", () => handleDistraction("视频"));
+                            addOption("打游戏", () => handleDistraction("游戏"));
+                            addOption("写游戏", () => handleDistraction("写游戏"));
+                        });
+                    });
+                });
+            }
+        }
+
+        // 处理分心行为
+        function handleDistraction(activity) {
+            const caught = Math.random() < 0.5;
+            
+            if (caught) {
+                if (activity === "写游戏") {
+                    const thoughtDoingHomework = Math.random() < 0.5;
+                    if (thoughtDoingHomework) {
+                        gameState.RP -= 5;
+                        gameState.ML += 3;
+                        gameState.HG += 1;
+                        gameState.XQ += 5;
+                        typeText("friendi以为你正在做题，所以摸了摸你的小脑袋\n人品值-5，码力值+3，好感度+1，心情值+5", () => {
+                            showMainMenu();
+                        });
+                    } else {
+                        gameState.RP -= 5;
+                        gameState.ML += 3;
+                        gameState.HG -= 5;
+                        gameState.XQ -= 4;
+                        typeText("friendi看出了你正在写游戏的代码\n于是，friendi十分生气，把你批了一顿！\n人品值-5，码力值+3，好感度-5，心情值-4", () => {
+                            showMainMenu();
+                        });
+                    }
+                } else {
+                    gameState.RP -= 5;
+                    gameState.ML -= 2;
+                    gameState.HG -= 10;
+                    gameState.XQ -= 5;
+                    
+                    if (activity === "游戏") {
+                        typeText("你忽然感受到了一种陌生的不安.\n一个黑色高大的阴影似乎遮住了你身后的灯的光,在电脑上投下了一个巨大的影子.\n一只手搭上了你的肩膀,你连忙按下Alt+F4,你听到了一个熟悉而恐怖的声音:\n", () => {
+                            typeText(`"${gameState.name},你跟我来一趟."\n`, () => {
+                                typeText("你迅速地回头,意识到这一切都在2000ms内发生.\n不过你很快地忘掉了所有东西,因为你看到那个向门口走去的人,是friendi高大的背影.", () => {
+                                    typeText("你来到门口,门外的一些是深蓝色的色调,仿佛一切都在深海里.\nfriendi转身,你看到了friendi那双深邃而恐怖的眼睛.", () => {
+                                        typeText(`"${gameState.name},你也是很聪明的孩子,但是你没有对信息学的热情."`, () => {
+                                            typeText("要劝退了吗?\n你全身的血液似乎已经凝结成冰凉的固体,你想说点什么,却不知道说什么,甚至发不出声音.", () => {
+                                                typeText("你的血液被friendi抽空,你的血管里流淌的已经不再是血,而是网络流,费用流,最小割,最大流,SPFA,01背包,Dijistra,莫比乌斯反演,递推,递归,bfs,dfs,最小生成树,Prim...", () => {
+                                                    typeText(`"与其在这打游戏浪费时间,你应该为了你的未来努力,\n${gameState.name}...你是个聪明的孩子."`, () => {
+                                                        typeText("似乎...似乎还有机会?\n你逐渐又听到了声音,听到了来自那扇熟悉的蓝色铁门的那些熟悉的喧嚣.\n充满了希望与期待.", () => {
+                                                            typeText(`"friendi,啊不是,老师对不起,我以后都不打游戏了,再给我一次机会吧老师..."`, () => {
+                                                                typeText("你急急忙忙地,用自认为尽可能诚恳的语调恳求着.\nfriendi转过身,却没有看你.", () => {
+                                                                    typeText(`"${gameState.name},那就再给你一次机会..."`, () => {
+                                                                        typeText(`"但是!你要记得努力,不要毁掉自己的前途!"`, () => {
+                                                                            typeText("friendi的眼睛里闪烁着寒光,仿佛在说,否则会有怎样的后果.", () => {
+                                                                                typeText(`"好的老师!"`, () => {
+                                                                                    typeText("你转身跑回教室,教室里一如既往地亮着灯,admin正在慢悠悠地讲着费用流......", () => {
+                                                                                        showMainMenu();
+                                                                                    });
+                                                                                });
+                                                                            });
+                                                                        });
+                                                                    });
+                                                                });
+                                                            });
+                                                        });
+                                                    });
+                                                });
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    } else {
+                        typeText(`Oh，No...有人拍了拍你的肩膀\n你下意识地把${activity === "小说" ? "书合上" : "网页关掉"}，回头去，一看........\nfriendi\n"你不许在讲课时看${activity}！"\n你吓死了（暗中哭泣）\n人品值-5，码力值-2，好感度-10，心情值-5`, () => {
+                            showMainMenu();
+                        });
+                    }
+                }
+            } else {
+                gameState.RP -= 5;
+                gameState.ML -= (activity === "写游戏" ? 2 : -3);
+                gameState.XQ += 2;
+                typeText(`你真幸运，没被friendi发现！\n人品值-5，码力值${activity === "写游戏" ? "+3" : "-2"}，心情+2`, () => {
+                    showMainMenu();
+                });
+            }
+            updateUI();
+        }
+
+        // 处理模拟赛
+        function handleMonisai() {
+            const isEasy = Math.random() < 0.66; // 2/3概率简单
+            
+            if (isEasy) {
+                typeText("今天的模拟赛好简单啊！so easy!\n你用了一半的时间就答完了题，AK!!\n你想在剩下的一半时间做什么？", () => {
+                    clearOptions();
+                    addOption("刷题", () => {
+                        const foundProblem = Math.random() < 0.5;
+                        if (foundProblem) {
+                            typeText("啊啊..遇到难题！怎么办？", () => {
+                                clearOptions();
+                                addOption("在网上找代码", () => {
+                                    const caught = Math.random() < 0.75;
+                                    if (caught) {
+                                        gameState.HG -= 10;
+                                        gameState.RP -= 10;
+                                        gameState.XQ -= 10;
+                                        typeText("Oh，No...有人拍了拍你的肩膀\n你下意识地把网页关掉，回头去，一看........\nfriendi\nfriendi狠狠地批了你一顿！\n好感度-10，人品值-10，心情-10", () => {
+                                            showMainMenu();
+                                        });
+                                    } else {
+                                        gameState.RP -= 5;
+                                        gameState.XQ += 2;
+                                        typeText("你真幸运，没被老师发现！\n人品值-5，心情+2", () => {
+                                            showMainMenu();
+                                        });
+                                    }
+                                    updateUI();
+                                });
+                                addOption("自己思考", () => {
+                                    gameState.HG += 10;
+                                    gameState.RP += 10;
+                                    gameState.XQ += 5;
+                                    gameState.ML += 5;
+                                    typeText("friendi走了进来，看到你在认真思考，摸了摸你的小脑袋\n好感度+10，人品值+10，心情+5，码力值+5", () => {
+                                        showMainMenu();
+                                    });
+                                    updateUI();
+                                });
+                            });
+                        } else {
+                            gameState.HG += 10;
+                            gameState.RP += 10;
+                            gameState.XQ += 5;
+                            gameState.ML += 5;
+                            typeText("题真简单...\n正在狂敲代码！突然，friendi走了进来，看到了你在敲代码，摸了摸你的小脑袋\n好感度+10，人品值+10，心情+5，码力值+5", () => {
+                                showMainMenu();
+                            });
+                            updateUI();
+                        }
+                    });
+                    addOption("睡觉", () => {
+                        const caught = Math.random() < 0.5;
+                        if (caught) {
+                            gameState.RP -= 5;
+                            gameState.XQ -= 2;
+                            gameState.HG -= 5;
+                            typeText("friendi走了进来，看到你在大睡，十分生气，狠狠地批了你一顿！\n人品值-5，心情-2，好感度-5", () => {
+                                showMainMenu();
+                            });
+                        } else {
+                            gameState.RP -= 5;
+                            gameState.XQ += 2;
+                            typeText("你真幸运，没被老师发现！\n人品值-5，心情+2", () => {
+                                showMainMenu();
+                            });
+                        }
+                        updateUI();
+                    });
+                    addOption("打游戏", () => {
+                        const caught = Math.random() < 0.5;
+                        if (caught) {
+                            typeText("你忽然感受到了一种陌生的不安.\n一个黑色高大的阴影似乎遮住了你身后的灯的光,在电脑上投下了一个巨大的影子.\n一只手搭上了你的肩膀,你连忙按下Alt+F4,你听到了一个熟悉而恐怖的声音:\n", () => {
+                                typeText(`"${gameState.name},你跟我来一趟."`, () => {
+                                    typeText("你迅速地回头,意识到这一切都在2000ms内发生.\n不过你很快地忘掉了所有东西,因为你看到那个向门口走去的人,是friendi高大的背影.", () => {
+                                        typeText("你来到门口,门外的一些是深蓝色的色调,仿佛一切都在深海里.\nfriendi转身,你看到了friendi那双深邃而恐怖的眼睛.", () => {
+                                            typeText(`"${gameState.name},你也是很聪明的孩子,但是你没有对信息学的热情."`, () => {
+                                                typeText("要劝退了吗?\n你全身的血液似乎已经凝结成冰凉的固体,你想说点什么,却不知道说什么,甚至发不出声音.", () => {
+                                                    typeText("你的血液被friendi抽空,你的血管里流淌的已经不再是血,而是网络流,费用流,最小割,最大流,SPFA,01背包,Dijistra,莫比乌斯反演,递推,递归,bfs,dfs,最小生成树,Prim...", () => {
+                                                        typeText(`"与其在这打游戏浪费时间,你应该为了你的未来努力,\n${gameState.name}...你是个聪明的孩子."`, () => {
+                                                            typeText("似乎...似乎还有机会?\n你逐渐又听到了声音,听到了来自那扇熟悉的蓝色铁门的那些熟悉的喧嚣.\n充满了希望与期待.", () => {
+                                                                typeText(`"friendi,啊不是,老师对不起,我以后都不打游戏了,再给我一次机会吧老师..."`, () => {
+                                                                    typeText("你急急忙忙地,用自认为尽可能诚恳的语调恳求着.\nfriendi转过身,却没有看你.", () => {
+                                                                        typeText(`"${gameState.name},那就再给你一次机会..."`, () => {
+                                                                            typeText(`"但是!你要记得努力,不要毁掉自己的前途!"`, () => {
+                                                                                typeText("friendi的眼睛里闪烁着寒光,仿佛在说,否则会有怎样的后果.", () => {
+                                                                                    typeText(`"好的老师!"`, () => {
+                                                                                        typeText("你转身跑回教室,教室里一如既往地亮着灯,admin正在慢悠悠地讲着费用流......", () => {
+                                                                                            gameState.RP -= 5;
+                                                                                            gameState.XQ -= 2;
+                                                                                            gameState.HG -= 5;
+                                                                                            updateUI();
+                                                                                            showMainMenu();
+                                                                                        });
+                                                                                    });
+                                                                                });
+                                                                            });
+                                                                        });
+                                                                    });
+                                                                });
+                                                            });
+                                                        });
+                                                    });
+                                                });
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        } else {
+                            gameState.RP -= 5;
+                            gameState.XQ += 2;
+                            typeText("你真幸运，没被老师发现！\n人品值-5，心情+2", () => {
+                                showMainMenu();
+                            });
+                            updateUI();
+                        }
+                    });
+                });
+            } else {
+                gameState.XQ -= 2;
+                gameState.ML += 2;
+                typeText("今天的模拟赛好难啊！！\n噼里啪啦噼里啪啦....\n铃铃铃...\n在响铃的一刻，交上了代码！\n心情-2，码力值+2", () => {
+                    showMainMenu();
+                });
+                updateUI();
+            }
+        }
+
+        // 检查模拟赛
+        function checkMonisai() {
+            const hasMonisai = Math.random() < 0.66; // 2/3概率有模拟赛
+            
+            if (!hasMonisai) {
+                typeText("今日没有模拟赛..", () => {
+                    showMainMenu();
+                });
+            } else {
+                handleMonisai();
+            }
+        }
+
+        // 检查集训
+        function checkJixun() {
+            if (gameState.Day % 30 !== 10) {
+                typeText("最近无集训", () => {
+                    showMainMenu();
+                });
+            } else {
+                jixun();
+            }
+        }
+
+        // 集训
+        function jixun() {
+            const jxt = Math.floor(Math.random() * 48) + 3;
+            let jxml = jxt * 3;
+            if (jxml >= 100) jxml *= 0.8;
+            
+            typeText(`本次集训为 ${jxt} 天，训后可增加码力值 ${Math.round(jxml)} 哦,报名吗?`, () => {
+                clearOptions();
+                addOption("报名", () => {
+                    gameState.Day += jxt;
+                    gameState.ML += Math.round(jxml);
+                    gameState.XQ -= 10;
+                    updateUI();
+                    typeText(`集训完成，你感觉自己更NB了。增加了${Math.round(jxml)}码力值。`, () => {
+                        showMainMenu();
+                    });
+                });
+                addOption("不报名", () => {
+                    showMainMenu();
+                });
+            });
+        }
+
+        // 检查NOIP
+        function checkNOIP() {
+            if (gameState.Day % 3 !== 2) {
+                typeText("今日没有NOIP比赛", () => {
+                    showMainMenu();
+                });
+            } else if (gameState.ML <= 60) {
+                typeText("码力值不足....", () => {
+                    showMainMenu();
+                });
+            } else {
+                NOIP();
+            }
+        }
+
+        // NOIP比赛
+        function NOIP() {
+            let fenshu = 0;
+            
+            typeText("正在前往考场......\n欢迎进入考试现场----NOIP\n请问你要先做哪题？", () => {
+                clearOptions();
+                addOption("第1题", () => handleNOIPQuestion(1, fenshu));
+                addOption("第2题", () => handleNOIPQuestion(2, fenshu));
+                addOption("第3题", () => handleNOIPQuestion(3, fenshu));
+                addOption("第4题", () => handleNOIPQuestion(4, fenshu));
+            });
+        }
+
+        // 处理NOIP题目
+        function handleNOIPQuestion(questionNum, currentScore) {
+            let fenshu = currentScore;
+            
+            if (questionNum === 1) {
+                typeText("这道题居然是简单的字符串╰(*°▽°*)╯\n话不多说，10分钟搞定！\n打代码中.....", () => {
+                    typeText("AC\n", () => {
+                        fenshu += 100;
+                        const randomChoice = Math.random() < 0.5 ? 1 : 2;
+                        
+                        if (randomChoice === 1) {
+                            typeText("后面的题都不会o(╥﹏╥)o 但是骗到了40分！\n", () => {
+                                fenshu += 40;
+                                showNOIPResult(fenshu);
+                            });
+                        } else {
+                            typeText("第二题是深搜\n你会吗？？", () => {
+                                clearOptions();
+                                addOption("会", () => handleNOIPDeepSearch(fenshu));
+                                addOption("不会", () => {
+                                    typeText("噢噢噢噢....", () => {
+                                        if (gameState.ML >= 150) {
+                                            typeText("第三题会╰(*°▽°*)╯\n打代码中......\n得了60分", () => {
+                                                fenshu += 60;
+                                                showNOIPResult(fenshu);
+                                            });
+                                        } else {
+                                            typeText("后面的题都不会o(╥﹏╥)o", () => {
+                                                showNOIPResult(fenshu);
+                                            });
+                                        }
+                                    });
+                                });
+                            });
+                        }
+                    });
+                });
+            } else if (questionNum === 2) {
+                typeText("第二题是深搜\n你会吗？？", () => {
+                    clearOptions();
+                    addOption("会", () => handleNOIPDeepSearch(fenshu));
+                    addOption("不会", () => {
+                        typeText("噢噢噢噢....", () => {
+                            if (gameState.ML >= 150) {
+                                typeText("第三题会╰(*°▽°*)╯\n打代码中......\n得了60分", () => {
+                                    fenshu += 60;
+                                    showNOIPResult(fenshu);
+                                });
+                            } else {
+                                typeText("后面的题都不会o(╥﹏╥)o", () => {
+                                    showNOIPResult(fenshu);
+                                });
+                            }
+                        });
+                    });
+                });
+            } else if (questionNum === 3) {
+                if (gameState.ML >= 200) {
+                    typeText("好不容易得了30分", () => {
+                        fenshu += 30;
+                        showNOIPResult(fenshu);
+                    });
+                } else {
+                    typeText("不会啊！", () => {
+                        showNOIPResult(fenshu);
+                    });
+                }
+            } else if (questionNum === 4) {
+                if (gameState.ML >= 320) {
+                    typeText("好不容易得了40分", () => {
+                        fenshu += 40;
+                        showNOIPResult(fenshu);
+                    });
+                } else {
+                    typeText("不会啊！", () => {
+                        showNOIPResult(fenshu);
+                    });
+                }
+            }
+        }
+
+        // 处理NOIP深搜题
+        function handleNOIPDeepSearch(fenshu) {
+            typeText("那我就考考你（深搜输出全排列）(每个答案中间有1个空格，且在一行内)：\n" +
+                "void dfs(int index)\n{\n    if(index == _____①_____)\n    {\n        for(int i = 1 ; i <= n ; i ++) cout<<_____②_____<<(i == n)?(endl):' ');\n        return ;\n    }\n    for(int i = 1 ; i <= n ; i ++)\n    {\n        if(flag[i] == false)\n        {\n            num[index] = _____③_____ ;\n            flag[i] = true ;\n            dfs(index + 1) ;\n            flag[i] = false ;\n        }\n    }\n}", () => {
+                // 这里简化处理，直接判断
+                const correctAnswers = ["n+1", "num[i]", "i"];
+                const isCorrect = Math.random() < (gameState.ML / 500); // 码力值越高，答对概率越大
+                
+                if (isCorrect) {
+                    typeText("看来你是真会深搜！", () => {
+                        if (fenshu === 0) {
+                            // 如果是第二题
+                            typeText("噢噢噢噢....\n得了55分....", () => {
+                                fenshu += 55;
+                                if (gameState.ML >= 150) {
+                                    typeText("第三题会╰(*°▽°*)╯\n打代码中......\n得了60分", () => {
+                                        fenshu += 60;
+                                        showNOIPResult(fenshu);
+                                    });
+                                } else {
+                                    typeText("后面的题都不会o(╥﹏╥)o", () => {
+                                        showNOIPResult(fenshu);
+                                    });
+                                }
+                            });
+                        } else {
+                            // 如果是第一题后的第二题
+                            typeText("噢噢噢噢....\n得了30分....", () => {
+                                fenshu += 30;
+                                showNOIPResult(fenshu);
+                            });
+                        }
+                    });
+                } else {
+                    gameState.ML -= 3;
+                    gameState.RP -= 10;
+                    gameState.XQ -= 5;
+                    updateUI();
+                    typeText("这么简单的题都不会，你骗我……\n这道题，你没得分\n码力值-3，人品值-10，心情-5", () => {
+                        showNOIPResult(fenshu);
+                    });
+                }
+            });
+        }
+
+        // 显示NOIP结果
+        function showNOIPResult(fenshu) {
+            typeText(`\n总分：${fenshu}`, () => {
+                if (fenshu === 0) {
+                    baoling();
+                } else if (fenshu <= 120) {
+                    gameState.RP -= 2;
+                    gameState.ML += 5;
+                    gameState.XQ -= 2;
+                    updateUI();
+                    typeText("你得了三等奖\n人品值-2，码力值+5，心情-2", () => {
+                        showMainMenu();
+                    });
+                } else if (fenshu <= 190) {
+                    gameState.RP -= 4;
+                    gameState.ML += 10;
+                    gameState.XQ += 2;
+                    updateUI();
+                    typeText("你获得了二等奖\n人品值-4，码力值+10，心情+2", () => {
+                        showMainMenu();
+                    });
+                } else {
+                    gameState.RP += 1;
+                    gameState.ML += 20;
+                    gameState.XQ += 10;
+                    updateUI();
+                    typeText("你获得了一等奖\n人品值+1，码力值+20，心情+10", () => {
+                        showMainMenu();
+                    });
+                }
+            });
+        }
+
+        // 爆零剧情
+        function baoling() {
+            typeText("考试结束了", () => {
+                typeText("你满怀期待地点开来查看分数的网站，从前往后开始浏览每个人的编号和名字。", () => {
+                    typeText("大神1...大神2...大神3... ... ... ... ...", () => {
+                        typeText("找了好久好久，终于在列表的最底端找到了", () => {
+                            typeText(`${gameState.name}的。`, () => {
+                                typeText("不对不对，我不可能爆零，应该是重名！", () => {
+                                    typeText("你核对了学校——没问题", () => {
+                                        typeText("地区——没问题", () => {
+                                            typeText("考号——必须有问题——", () => {
+                                                typeText("没问题...", () => {
+                                                    typeText("啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊！！！", () => {
+                                                        typeText("你不得不学着面对这样一个事实：", () => {
+                                                            typeText("你爆零了。", () => {
+                                                                for (let i = 0; i < 5; i++) {
+                                                                    typeText("你爆零了。", () => {});
+                                                                }
+                                                                typeText("周围的世界似乎安静了下来，窗外的小鸟突然停止了叽叽喳喳的叫声。", () => {
+                                                                    const retg = Math.floor(Math.random() * 100) + 1;
+                                                                    if (gameState.ML >= 400) gameState.ML += 50;
+                                                                    if (gameState.ML >= 550) gameState.ML += 50;
+                                                                    if (gameState.ML >= 700) gameState.ML += 70;
+                                                                    
+                                                                    typeText(`你看了一遍题和自己的代码，突然发现你本来可以打${retg}分的...`, () => {
+                                                                        typeText("于是，你自闭了.", () => {
+                                                                            typeText("窗外的太阳慢慢地沉下去，不知道什么时候开始下起了淅淅沥沥的小雨。", () => {
+                                                                                typeText("你穿上雨衣走到雨里", () => {
+                                                                                    typeText("思考人生", () => {
+                                                                                        for (let i = 0; i < 5; i++) {
+                                                                                            typeText("... ...", () => {});
+                                                                                        }
+                                                                                        typeText("你患上了抑郁症晚期以及自闭症晚期。", () => {
+                                                                                            typeText(`你回到家里，闭着眼睛关闭有分数的网页——你实在不想再看一遍刺眼的"${gameState.name}——0分"。`, () => {
+                                                                                                typeText("光线正不可挽回地消逝，一派荒凉。", () => {
+                                                                                                    typeText("人品值-4，码力值+0，心情-10", () => {
+                                                                                                        gameState.RP -= 4;
+                                                                                                        gameState.XQ -= 10;
+                                                                                                        updateUI();
+                                                                                                        showMainMenu();
+                                                                                                    });
+                                                                                                });
+                                                                                            });
+                                                                                        });
+                                                                                    });
+                                                                                });
+                                                                            });
+                                                                        });
+                                                                    });
+                                                                });
+                                                            });
+                                                        });
+                                                    });
+                                                });
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        }
+
+        // 检查NOI
+        function checkNOI() {
+            if (gameState.Day % 5 !== 2) {
+                typeText("今日没有NOI比赛", () => {
+                    showMainMenu();
+                });
+            } else if (gameState.ML <= 150) {
+                typeText("码力值不足....", () => {
+                    showMainMenu();
+                });
+            } else {
+                NOI();
+            }
+        }
+
+        // NOI比赛
+        function NOI() {
+            let fenshu = 0;
+            const isEasy = Math.random() < 0.33; // 1/3概率简单
+            
+            typeText("正在前往考场......\n欢迎进入考试现场----NOI", () => {
+                if (isEasy) {
+                    typeText("今天的NOI好简单啊！so easy!(共三道题)", () => {
+                        if (gameState.ML <= 200) {
+                            fenshu += Math.floor(Math.random() * 100) + 50;
+                        } else if (gameState.ML <= 300) {
+                            fenshu += Math.floor(Math.random() * 100) + 100;
+                        } else {
+                            fenshu += Math.floor(Math.random() * 100) + 201;
+                        }
+                        
+                        typeText(`你用了一半的时间就答完了题！（结果最终打了${fenshu}分）\n你想在剩下的一半时间做什么？`, () => {
+                            clearOptions();
+                            addOption("睡觉", () => handleNOIFreeTime(fenshu, "sleep"));
+                            addOption("打游戏", () => handleNOIFreeTime(fenshu, "game"));
+                            addOption("闲待着", () => {
+                                typeText("你无聊地度过了剩下的时间。", () => {
+                                    showNOIResult(fenshu);
+                                });
+                            });
+                            addOption("离开考场", () => {
+                                typeText("你提前离开了考场。", () => {
+                                    showNOIResult(fenshu);
+                                });
+                            });
+                            addOption("再改改题", () => handleNOIModify(fenshu));
+                        });
+                    });
+                } else {
+                    const retgqw = Math.floor(Math.random() * 100) + 1;
+                    fenshu += (100 - retgqw);
+                    if (gameState.ML >= 350) fenshu += 50;
+                    
+                    typeText("今天的NOI好难啊！！\n噼里啪啦噼里啪啦....\n铃铃铃...", () => {
+                        typeText(`在响铃的一刻，交上了代码！得了${fenshu}分\n心情-2，码力值+2`, () => {
+                            gameState.XQ -= 2;
+                            gameState.ML += 2;
+                            updateUI();
+                            showNOIResult(fenshu);
+                        });
+                    });
+                }
+            });
+        }
+
+        // 处理NOI自由时间
+        function handleNOIFreeTime(fenshu, activity) {
+            const caught = Math.random() < 0.5;
+            
+            if (caught) {
+                gameState.RP -= 5;
+                gameState.XQ -= 2;
+                typeText(`考官走了进来，看到你在${activity === "sleep" ? "大睡" : "玩游戏"}，十分生气，把你请出了考场！\n人品值-5，心情-2`, () => {
+                    updateUI();
+                    showMainMenu();
+                });
+            } else {
+                gameState.RP -= 5;
+                gameState.XQ += 2;
+                typeText("你真幸运，没被考官发现！\n人品值-5，心情+2", () => {
+                    updateUI();
+                    showNOIResult(fenshu);
+                });
+            }
+        }
+
+        // 处理NOI修改题目
+        function handleNOIModify(fenshu) {
+            if (gameState.ML >= 320) {
+                typeText("你又提高了10分，真棒！", () => {
+                    fenshu += 10;
+                    showNOIResult(fenshu);
+                });
+            } else if (gameState.ML >= 250) {
+                typeText("你啥也没改", () => {
+                    showNOIResult(fenshu);
+                });
+            } else {
+                typeText("你又把原来对的题改错了，真垃圾！", () => {
+                    fenshu -= 10;
+                    showNOIResult(fenshu);
+                });
+            }
+        }
+
+        // 显示NOI结果
+        function showNOIResult(fenshu) {
+            typeText(`\n总分：${fenshu}`, () => {
+                if (fenshu === 0) {
+                    baoling();
+                } else if (fenshu <= 100) {
+                    gameState.RP -= 2;
+                    gameState.ML += 5;
+                    gameState.XQ -= 2;
+                    updateUI();
+                    typeText("你得了铜牌\n人品值-2，码力值+5，心情-2", () => {
+                        showMainMenu();
+                    });
+                } else if (fenshu <= 200) {
+                    gameState.RP -= 4;
+                    gameState.ML += 10;
+                    gameState.XQ += 2;
+                    updateUI();
+                    typeText("你获得了银牌\n人品值-4，码力值+10，心情+2", () => {
+                        showMainMenu();
+                    });
+                } else if (fenshu < 300) {
+                    gameState.RP += 1;
+                    gameState.ML += 20;
+                    gameState.XQ += 10;
+                    updateUI();
+                    typeText("你获得了金牌\n人品值+1，码力值+20，心情+10", () => {
+                        showMainMenu();
+                    });
+                } else if (fenshu === 300) {
+                    gameState.RP += 5;
+                    gameState.ML += 30;
+                    gameState.XQ += 20;
+                    updateUI();
+                    typeText("你AK了,第一名\n人品值+5，码力值+30，心情+20", () => {
+                        showMainMenu();
+                    });
+                }
+            });
+        }
+
+        // 检查IOI
+        function checkIOI() {
+            if (gameState.Day % 10 !== 4) {
+                typeText("今日没有IOI比赛", () => {
+                    showMainMenu();
+                });
+            } else if (gameState.ML <= 300) {
+                typeText("码力值不足....", () => {
+                    showMainMenu();
+                });
+            } else {
+                IOI();
+            }
+        }
+
+        // IOI比赛
+        function IOI() {
+            let fenshu = 0;
+            
+            typeText("正在前往考场......\n欢迎进入考试现场----IOI\n你想做第几题？(共三道题)", () => {
+                clearOptions();
+                addOption("第1题", () => handleIOIQuestion(1, fenshu));
+                addOption("第2题", () => handleIOIQuestion(2, fenshu));
+                addOption("第3题", () => handleIOIQuestion(3, fenshu));
+            });
+        }
+
+        // 处理IOI题目
+        function handleIOIQuestion(questionNum, currentScore) {
+            let fenshu = currentScore;
+            
+            if (questionNum === 1) {
+                typeText("问题描述\n" +
+                    "IOI2015 开幕式正在进行最后一个环节。按计划在开幕式期间,每个代表队都将收到由主办方发放的一个装有纪念品的盒子。然而所有志愿者都被精彩的开幕式所吸引,除 Aman外其他人完全忘记了发放纪念品这件事。Aman 是一位热情的志愿者,为使得 IOI 尽量圆满,他要用最短的时间将所有纪念品发放出去。开幕式的场地是一个圆环,被分为 个完全相等的区域,这些区域的编号依次为 0 到 L-1,也就是说,对于 0≤i≤L-2,区域 i 与区域 i+1 相邻,且区域 L-1 与区域 0 相邻。场地上共有N 个代表队,每队坐在上面的一个区域上,每个区域可以包含任意多个代表队,也可以为空。共有 N 个相同的纪念品。开始,Aman 和所有纪念品都在区域 0。Aman 应该给每队一个纪念品,并且在发放完最后一个纪念品后他必须回到区域 0。注意,有些队可能坐在区域 0。在任意时刻,Aman 只能够携带至多 K 个纪念品。Aman 必须从区域 0 取走这些纪念品,且取纪念品不需要时间。纪念品一旦从区域 0 被取走后,Aman 只能将其发放给某个代表队或者随身携带。无论何时,Aman 携带一个或更多的纪念品到达一个这样的区域,该区域有一个代表队尚未收到纪念品,Aman 便可将他携带的一个纪念品发给这个代表队。这种发放也在瞬间完成。他所花的时间都消耗在区域之间的移动上。无论携带多少纪念品,Aman 都需要 1 秒钟从一个区域移动到其相邻的区域(可以顺时针移动也可以逆时针移动)。你的任务是计算出 Aman 发放完所有纪念品并返回到他的最初区域所需要的最短时间(秒数)。\n" +
+                    "输入格式\n" +
+                    "第一行: N K L\n第二行: positions[0] ... positions[N-1]\nN: 代表队的数目。\nK: Aman 在同一时间能够携带纪念品的最大数目。\nL: 开幕式场地上的区域数目。\npositions: 一个长度为 N 的数组,positions[0],...,positions[N-1]给出了所有代表队所在区域的编号。positions 的元素按非递减排序。\n" +
+                    "输出格式\n" +
+                    "一个整数,表示 Aman 能够完成这一任务所需的最短时间(秒数)。\n" +
+                    "样例输入输出\nInput\n3 2 8 \n1 2 5 \nOutput\n10", () => {
+                        if (gameState.ML >= 600) {
+                            typeText("这题太简单了！\n废话不多说，半个小时搞定！\n敲代码中......", () => {
+                                typeText("AC通过！", () => {
+                                    fenshu += 100;
+                                    typeText("请做第二题", () => {
+                                        handleIOIQuestion(2, fenshu);
+                                    });
+                                });
+                            });
+                        } else {
+                            let ms = Math.floor(Math.random() * 50) + 11;
+                            if (gameState.ML >= 500) ms += 40;
+                            
+                            typeText("这题好难啊！\n思考中......", () => {
+                                typeText("想到了！！\n敲代码中......", () => {
+                                    typeText(`得了${ms}分！`, () => {
+                                        fenshu += ms;
+                                        typeText("请做第二题", () => {
+                                            handleIOIQuestion(2, fenshu);
+                                        });
+                                    });
+                                });
+                            });
+                        }
+                    });
+            } else if (questionNum === 2) {
+                typeText("这就是一道简单的最短路径问题嘛！！\n数据这么小,Floyd就可以解决!", () => {
+                    typeText("敲代码中......", () => {
+                        if (gameState.ML >= 600) {
+                            typeText("咦？？我是不是看错数据了？？\n好像是的！(n≤5e3)？", () => {
+                                typeText("哦，我知道了！\n用SPFA就不超限了", () => {
+                                    typeText("重打代码中......", () => {
+                                        typeText("AC通过！", () => {
+                                            fenshu += 100;
+                                            typeText("请做第三题", () => {
+                                                handleIOIQuestion(3, fenshu);
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        } else {
+                            let ms = Math.floor(Math.random() * 50) + 11;
+                            if (gameState.ML >= 500) ms += 40;
+                            
+                            typeText(`交上去后，只得了${ms}分`, () => {
+                                fenshu += ms;
+                                typeText("请做第三题", () => {
+                                    handleIOIQuestion(3, fenshu);
+                                });
+                            });
+                        }
+                    });
+                });
+            } else if (questionNum === 3) {
+                typeText("这太难了！！\n思考中......", () => {
+                    typeText("还剩30分钟，请问你要做什么？？", () => {
+                        clearOptions();
+                        addOption("输出样例数据", () => {
+                            let ms = Math.floor(Math.random() * 10);
+                            if (gameState.ML >= 600) ms += 10;
+                            typeText(`你得了${ms}分`, () => {
+                                fenshu += ms;
+                                showIOIResult(fenshu);
+                            });
+                        });
+                        addOption("打游戏", () => {
+                            const caught = Math.random() < 0.5;
+                            if (caught) {
+                                gameState.RP -= 5;
+                                gameState.XQ += 2;
+                                typeText("你真幸运，没被考官发现！\n人品值-5，心情+2", () => {
+                                    updateUI();
+                                    showIOIResult(fenshu);
+                                });
+                            } else {
+                                gameState.RP -= 5;
+                                gameState.XQ -= 2;
+                                typeText("考官走了进来，看到你在玩游戏，十分生气，把你请出考场！\n人品值-5，心情-2", () => {
+                                    updateUI();
+                                    showMainMenu();
+                                });
+                            }
+                        });
+                        addOption("干坐着", () => {
+                            typeText("你无聊地度过了剩下的时间。", () => {
+                                showIOIResult(fenshu);
+                            });
+                        });
+                    });
+                });
+            }
+        }
+
+        // 显示IOI结果
+        function showIOIResult(fenshu) {
+            typeText(`\n总分：${fenshu}分`, () => {
+                if (fenshu === 0) {
+                    baoling();
+                } else if (fenshu <= 100) {
+                    gameState.RP -= 2;
+                    gameState.ML += 10;
+                    gameState.XQ += 1;
+                    updateUI();
+                    typeText("你得了铜牌\n人品值-2，码力值+10，心情+1", () => {
+                        showMainMenu();
+                    });
+                } else if (fenshu <= 200) {
+                    gameState.RP -= 4;
+                    gameState.ML += 20;
+                    gameState.XQ += 5;
+                    updateUI();
+                    typeText("你获得了银牌\n人品值-4，码力值+20，心情+5", () => {
+                        showMainMenu();
+                    });
+                } else if (fenshu < 300) {
+                    gameState.RP += 1;
+                    gameState.ML += 30;
+                    gameState.XQ += 20;
+                    updateUI();
+                    typeText("你获得了金牌\n人品值+1，码力值+30，心情+20", () => {
+                        showMainMenu();
+                    });
+                } else if (fenshu === 300) {
+                    gameState.RP += 5;
+                    gameState.ML += 35;
+                    gameState.XQ += 40;
+                    updateUI();
+                    typeText("你AK了,第一名\n人品值+5，码力值+35，心情+40", () => {
+                        showMainMenu();
+                    });
+                }
+            });
+        }
+
+        // 打开网页
+        function openfile() {
+            typeText("请问你要打开什么？", () => {
+                clearOptions();
+                addOption("百度", () => {
+                    window.open("https://www.baidu.com", "_blank");
+                    zhuye();
+                });
+                addOption("ACcoders", () => {
+                    window.open("https://www.accoders.com", "_blank");
+                    zhuye();
+                });
+                addOption("DBSDFZOJ", () => {
+                    window.open("http://218.62.22.209:8080", "_blank");
+                    zhuye();
+                });
+                addOption("东师附中OI", () => {
+                    window.open("http://msannuoi.com", "_blank");
+                    zhuye();
+                });
+                addOption("4399小游戏", () => {
+                    window.open("https://www.4399.com", "_blank");
+                    zhuye();
+                });
+                addOption("洛谷", () => {
+                    window.open("https://www.luogu.com.cn", "_blank");
+                    zhuye();
+                });
+                addOption("百度翻译", () => {
+                    window.open("https://fanyi.baidu.com", "_blank");
+                    zhuye();
+                });
+                addOption("东师附中 OJ", () => {
+                    window.open("https://hydro.ac/d/wangping/", "_blank");
+                    zhuye();
+                });
+            });
+        }
+
+        // 主菜单
+        function zhuye() {
+            if (!checkGameOver()) {
+                showMainMenu();
+            }
+        }
+
+        // 事件监听
+        elements.newGameBtn.addEventListener('click', showNewGameModal);
+        elements.saveLoadBtn.addEventListener('click', showSaveLoadModal);
+        elements.confirmNewGame.addEventListener('click', () => {
+            const name = elements.nameInput.value.trim();
+            if (name) {
+                hideNewGameModal();
+                startNewGame(name);
+            }
+        });
+        elements.cancelNewGame.addEventListener('click', hideNewGameModal);
+        elements.saveGameBtn.addEventListener('click', () => {
+            elements.saveData.value = JSON.stringify(gameState);
+        });
+        elements.loadGameBtn.addEventListener('click', () => {
+            if (loadGame(elements.loadData.value)) {
+                hideSaveLoadModal();
+            } else {
+                alert("无效的保存数据！");
+            }
+        });
+        elements.closeSaveLoad.addEventListener('click', hideSaveLoadModal);
+
+        // 初始化游戏
+        initGame();
     </script>
 </body>
 </html>
