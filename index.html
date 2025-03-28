@@ -114,11 +114,18 @@
             border-radius: 15px;
             box-shadow: var(--shadow);
             min-height: 70vh;
+            display: flex;
+            flex-direction: column;
         }
 
         .typing-text {
             line-height: 1.6;
             min-height: 100px;
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
         }
 
         .options {
@@ -154,6 +161,8 @@
             border-radius: 10px;
             width: 80%;
             max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
         }
 
         .modal-actions {
@@ -161,6 +170,28 @@
             justify-content: flex-end;
             gap: 10px;
             margin-top: 20px;
+        }
+
+        .history-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+
+        .history-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .history-date {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .history-preview {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: #666;
         }
 
         @media (max-width: 768px) {
@@ -181,6 +212,7 @@
         <div class="game-controls">
             <button id="newGameBtn">新游戏</button>
             <button id="saveLoadBtn">保存/加载</button>
+            <button id="historyBtn">历史记录</button>
         </div>
     </div>
 
@@ -266,6 +298,20 @@
         </div>
     </div>
 
+    <!-- 历史记录模态框 -->
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <h2>历史对话记录</h2>
+            <div id="historyList" style="max-height: 400px; overflow-y: auto;">
+                <!-- 历史记录将在这里动态生成 -->
+            </div>
+            <div class="modal-actions">
+                <button id="closeHistory">关闭</button>
+                <button id="clearHistory">清空历史</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // 加密密钥 - 可以更改为你自己的密钥
         const ENCRYPTION_KEY = "OI_Growth_Game_Secret_Key_123!@#";
@@ -281,7 +327,9 @@
             name: "",
             isCheatMode: false,
             // 添加版本控制
-            version: "1.1"
+            version: "1.2",
+            // 历史记录
+            history: []
         };
 
         // DOM元素
@@ -301,8 +349,10 @@
             jbValue: document.getElementById('jbValue'),
             newGameBtn: document.getElementById('newGameBtn'),
             saveLoadBtn: document.getElementById('saveLoadBtn'),
+            historyBtn: document.getElementById('historyBtn'),
             newGameModal: document.getElementById('newGameModal'),
             saveLoadModal: document.getElementById('saveLoadModal'),
+            historyModal: document.getElementById('historyModal'),
             nameInput: document.getElementById('nameInput'),
             confirmNewGame: document.getElementById('confirmNewGame'),
             cancelNewGame: document.getElementById('cancelNewGame'),
@@ -310,7 +360,10 @@
             loadGameBtn: document.getElementById('loadGameBtn'),
             saveData: document.getElementById('saveData'),
             loadData: document.getElementById('loadData'),
-            closeSaveLoad: document.getElementById('closeSaveLoad')
+            closeSaveLoad: document.getElementById('closeSaveLoad'),
+            historyList: document.getElementById('historyList'),
+            closeHistory: document.getElementById('closeHistory'),
+            clearHistory: document.getElementById('clearHistory')
         };
 
         // 加密函数
@@ -360,7 +413,7 @@
             }
             
             // 检查必需字段
-            const requiredFields = ['RP', 'ML', 'HG', 'XQ', 'JB', 'Day', 'name', 'isCheatMode'];
+            const requiredFields = ['RP', 'ML', 'HG', 'XQ', 'JB', 'Day', 'name', 'isCheatMode', 'history'];
             for (const field of requiredFields) {
                 if (!(field in data)) {
                     console.warn(`缺少必需字段: ${field}`);
@@ -369,6 +422,83 @@
             }
             
             return true;
+        }
+
+        // 添加历史记录
+        function addHistoryEntry(text) {
+            if (!text || !gameState.name) return;
+            
+            const now = new Date();
+            const entry = {
+                timestamp: now.getTime(),
+                date: now.toLocaleString(),
+                text: text,
+                state: {
+                    RP: gameState.RP,
+                    ML: gameState.ML,
+                    HG: gameState.HG,
+                    XQ: gameState.XQ,
+                    JB: gameState.JB,
+                    Day: gameState.Day
+                }
+            };
+            
+            gameState.history.unshift(entry); // 添加到开头
+            if (gameState.history.length > 100) {
+                gameState.history.pop(); // 限制历史记录数量
+            }
+            
+            saveGame();
+        }
+
+        // 显示历史记录
+        function showHistory() {
+            elements.historyList.innerHTML = '';
+            
+            if (gameState.history.length === 0) {
+                elements.historyList.innerHTML = '<p>暂无历史记录</p>';
+                return;
+            }
+            
+            gameState.history.forEach((entry, index) => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.innerHTML = `
+                    <div class="history-date">${entry.date}</div>
+                    <div class="history-preview">${entry.text.substring(0, 50)}${entry.text.length > 50 ? '...' : ''}</div>
+                `;
+                item.addEventListener('click', () => viewHistoryDetail(index));
+                elements.historyList.appendChild(item);
+            });
+        }
+
+        // 查看历史记录详情
+        function viewHistoryDetail(index) {
+            if (index < 0 || index >= gameState.history.length) return;
+            
+            const entry = gameState.history[index];
+            const detail = `
+                <h3>${entry.date}</h3>
+                <p>${entry.text.replace(/\n/g, '<br>')}</p>
+                <h4>游戏状态</h4>
+                <p>人品值: ${entry.state.RP}</p>
+                <p>码力值: ${entry.state.ML}</p>
+                <p>好感度: ${entry.state.HG}</p>
+                <p>心情值: ${entry.state.XQ}</p>
+                <p>级别: ${entry.state.JB}</p>
+                <p>坚持天数: ${entry.state.Day}</p>
+            `;
+            
+            alert(detail); // 简单使用alert显示详情，可以替换为更美观的模态框
+        }
+
+        // 清空历史记录
+        function clearHistory() {
+            if (confirm('确定要清空所有历史记录吗？此操作不可撤销！')) {
+                gameState.history = [];
+                saveGame();
+                showHistory();
+            }
         }
 
         // 初始化游戏
@@ -415,6 +545,17 @@
             elements.saveLoadModal.style.display = 'none';
         }
 
+        // 显示历史记录模态框
+        function showHistoryModal() {
+            showHistory();
+            elements.historyModal.style.display = 'flex';
+        }
+
+        // 隐藏历史记录模态框
+        function hideHistoryModal() {
+            elements.historyModal.style.display = 'none';
+        }
+
         // 开始新游戏
         function startNewGame(name) {
             gameState.name = name;
@@ -425,6 +566,7 @@
             gameState.JB = 1;
             gameState.Day = 0;
             gameState.isCheatMode = false;
+            gameState.history = [];
             
             // 检查是否是作弊模式
             const cheatNames = ["王平", "wangping", "Aranea", "晨曦", "yangmo", "杨默", "HuZHUNZHUN"];
@@ -432,6 +574,7 @@
             
             if (gameState.isCheatMode) {
                 typeText("已开启作者作弊模式！\n请选择初始属性值。", () => {
+                    addHistoryEntry("已开启作者作弊模式！\n请选择初始属性值。");
                     showCheatModeOptions();
                 });
             } else {
@@ -444,6 +587,7 @@
                 gameState.ML += 3;
                 
                 typeText(`\n自我介绍：我叫${name},是一名蒟蒻,但我有一个理想——当一个大神犇！\n`, () => {
+                    addHistoryEntry(`自我介绍：我叫${name},是一名蒟蒻,但我有一个理想——当一个大神犇！`);
                     showMainMenu();
                 });
             }
@@ -457,6 +601,7 @@
             clearOptions();
             
             typeText("请问您要加多少码力值(≤1000)？", () => {
+                addHistoryEntry("请问您要加多少码力值(≤1000)？");
                 addOption("100", () => setCheatValue('ML', 100));
                 addOption("500", () => setCheatValue('ML', 500));
                 addOption("1000", () => setCheatValue('ML', 1000));
@@ -470,6 +615,7 @@
             
             if (stat === 'ML') {
                 typeText(`码力值已设置为 ${value}。\n请问您要加多少人品值(≤1000)？`, () => {
+                    addHistoryEntry(`码力值已设置为 ${value}。\n请问您要加多少人品值(≤1000)？`);
                     clearOptions();
                     addOption("100", () => setCheatValue('RP', 100));
                     addOption("500", () => setCheatValue('RP', 500));
@@ -477,6 +623,7 @@
                 });
             } else if (stat === 'RP') {
                 typeText(`人品值已设置为 ${value}。\n请问您要加多少好感度(≤1000)？`, () => {
+                    addHistoryEntry(`人品值已设置为 ${value}。\n请问您要加多少好感度(≤1000)？`);
                     clearOptions();
                     addOption("100", () => setCheatValue('HG', 100));
                     addOption("500", () => setCheatValue('HG', 500));
@@ -484,7 +631,9 @@
                 });
             } else if (stat === 'HG') {
                 typeText(`好感度已设置为 ${value}。\n`, () => {
+                    addHistoryEntry(`好感度已设置为 ${value}。`);
                     typeText(`\n自我介绍：我叫${gameState.name},是一名蒟蒻,但我有一个理想——当一个大神犇！\n`, () => {
+                        addHistoryEntry(`自我介绍：我叫${gameState.name},是一名蒟蒻,但我有一个理想——当一个大神犇！`);
                         showMainMenu();
                     });
                 });
@@ -556,7 +705,7 @@
             elements.hgValue.textContent = gameState.HG;
             elements.hgBar.style.width = `${Math.min(100, gameState.HG / gameState.ML * 100.0)}%`;
             elements.xqValue.textContent = gameState.XQ;
-            elements.xqBar.style.width = `${Math.min(100, gameState.XQ / gameState.ML * 100.0)}%`;
+            elements.xqBar.style.width = `${Math.min(100, gameState.XQ)}%`;
             elements.dayValue.textContent = gameState.Day;
             elements.jbValue.textContent = gameState.JB;
         }
@@ -570,7 +719,7 @@
                 if (i < text.length) {
                     elements.content.innerHTML += text.charAt(i);
                     i++;
-                    setTimeout(typing, 30);
+                    setTimeout(typing, 35);
                 } else if (callback) {
                     callback();
                 }
@@ -602,6 +751,7 @@
             checkLevelUp();
             
             typeText(`第 ${gameState.Day} 天，请问你要做什么？`, () => {
+                addHistoryEntry(`第 ${gameState.Day} 天，请问你要做什么？`);
                 clearOptions();
                 addOption("去师大附中", () => shidafuzhong());
                 addOption("参加模拟赛", () => checkMonisai());
@@ -615,6 +765,7 @@
                     gameState.RP -= 10;
                     updateUI();
                     typeText("在家颓废了一天，码力值-10，心情+10，人品值-10", () => {
+                        addHistoryEntry("在家颓废了一天，码力值-10，心情+10，人品值-10");
                         showMainMenu();
                     });
                 });
@@ -629,6 +780,7 @@
         function checkGameOver() {
             if (gameState.RP < 0 || gameState.ML < 0 || gameState.HG < -30) {
                 typeText("\n你因人品和码力值太低或好感度太低，被friendi清退！！", () => {
+                    addHistoryEntry("\n你因人品和码力值太低或好感度太低，被friendi清退！！");
                     clearOptions();
                     addOption("重新开始", () => {
                         localStorage.removeItem('oiGrowthGame');
@@ -653,10 +805,12 @@
                     gameState.XQ += 10;
                     gameState.HG += 10;
                     typeText("恭喜您坚持1年，获得彩蛋1枚！\n人品值+10，码力值+10，心情+10，好感度+10，级别+10", () => {
+                        addHistoryEntry("恭喜您坚持1年，获得彩蛋1枚！\n人品值+10，码力值+10，心情+10，好感度+10，级别+10");
                         updateUI();
                     });
                 } else {
                     typeText(`您已在OI的道路上坚持了${gameState.Day}天，级别+1`, () => {
+                        addHistoryEntry(`您已在OI的道路上坚持了${gameState.Day}天，级别+1`);
                         updateUI();
                     });
                 }
@@ -668,9 +822,11 @@
             if (gameState.Day % 7 === 6) {
                 // 星期六，有模拟赛
                 typeText("今天是星期六，有模拟赛！！", () => {
+                    addHistoryEntry("今天是星期六，有模拟赛！！");
                     const isLate = Math.random() < 0.5;
                     if (isLate) {
                         typeText("你堵车了，迟到了3分钟！\n于是你要：", () => {
+                            addHistoryEntry("你堵车了，迟到了3分钟！\n于是你要：");
                             clearOptions();
                             addOption("向老师认错", () => {
                                 gameState.RP += 5;
@@ -678,6 +834,7 @@
                                 gameState.XQ += 5;
                                 updateUI();
                                 typeText("friendi表扬你是一个知错就改的好OIER\n人品值+5，好感度+5，心情值+5", () => {
+                                    addHistoryEntry("friendi表扬你是一个知错就改的好OIER\n人品值+5，好感度+5，心情值+5");
                                     handleMonisai();
                                 });
                             });
@@ -688,12 +845,14 @@
                                     gameState.HG -= 5;
                                     gameState.XQ -= 5;
                                     typeText("你被friendi碰了个正着，friendi狠狠地批了你一顿！\n人品值-5，好感度-5，心情值-5", () => {
+                                        addHistoryEntry("你被friendi碰了个正着，friendi狠狠地批了你一顿！\n人品值-5，好感度-5，心情值-5");
                                         handleMonisai();
                                     });
                                 } else {
                                     gameState.RP -= 5;
                                     gameState.XQ += 2;
                                     typeText("你竟然没遇到friendi！\n你溜回了座位，沾沾自喜起来！\n人品值-5，心情值+2", () => {
+                                        addHistoryEntry("你竟然没遇到friendi！\n你溜回了座位，沾沾自喜起来！\n人品值-5，心情值+2");
                                         handleMonisai();
                                     });
                                 }
@@ -707,6 +866,7 @@
             } else {
                 // 平常上课日
                 typeText("老师开始讲课了，你要认真听讲吗？", () => {
+                    addHistoryEntry("老师开始讲课了，你要认真听讲吗？");
                     clearOptions();
                     addOption("认真听讲", () => {
                         gameState.RP += 5;
@@ -715,11 +875,13 @@
                         gameState.XQ -= 2;
                         updateUI();
                         typeText("你认认真真的听完了课，感觉自已更NB了！\n人品值+5，码力值+5，好感度+2，心情值-2", () => {
+                            addHistoryEntry("你认认真真的听完了课，感觉自已更NB了！\n人品值+5，码力值+5，好感度+2，心情值-2");
                             showMainMenu();
                         });
                     });
                     addOption("不认真听讲", () => {
                         typeText("那你要做什么？", () => {
+                            addHistoryEntry("那你要做什么？");
                             clearOptions();
                             addOption("看小说", () => handleDistraction("小说"));
                             addOption("看视频", () => handleDistraction("视频"));
@@ -744,6 +906,7 @@
                         gameState.HG += 1;
                         gameState.XQ += 5;
                         typeText("friendi以为你正在做题，所以摸了摸你的小脑袋\n人品值-5，码力值+3，好感度+1，心情值+5", () => {
+                            addHistoryEntry("friendi以为你正在做题，所以摸了摸你的小脑袋\n人品值-5，码力值+3，好感度+1，心情值+5");
                             showMainMenu();
                         });
                     } else {
@@ -752,6 +915,7 @@
                         gameState.HG -= 5;
                         gameState.XQ -= 4;
                         typeText("friendi看出了你正在写游戏的代码\n于是，friendi十分生气，把你批了一顿！\n人品值-5，码力值+3，好感度-5，心情值-4", () => {
+                            addHistoryEntry("friendi看出了你正在写游戏的代码\n于是，friendi十分生气，把你批了一顿！\n人品值-5，码力值+3，好感度-5，心情值-4");
                             showMainMenu();
                         });
                     }
@@ -778,6 +942,7 @@
                                                                             typeText("friendi的眼睛里闪烁着寒光,仿佛在说,否则会有怎样的后果.", () => {
                                                                                 typeText(`"好的老师!"`, () => {
                                                                                     typeText("你转身跑回教室,教室里一如既往地亮着灯,admin正在慢悠悠地讲着费用流......", () => {
+                                                                                        addHistoryEntry("你打游戏被friendi发现，经过一番教育后被给予一次机会");
                                                                                         showMainMenu();
                                                                                     });
                                                                                 });
@@ -797,6 +962,7 @@
                         });
                     } else {
                         typeText(`Oh，No...有人拍了拍你的肩膀\n你下意识地把${activity === "小说" ? "书合上" : "网页关掉"}，回头去，一看........\nfriendi\n"你不许在讲课时看${activity}！"\n你吓死了（暗中哭泣）\n人品值-5，码力值-2，好感度-10，心情值-5`, () => {
+                            addHistoryEntry(`Oh，No...有人拍了拍你的肩膀\n你下意识地把${activity === "小说" ? "书合上" : "网页关掉"}，回头去，一看........\nfriendi\n"你不许在讲课时看${activity}！"\n你吓死了（暗中哭泣）\n人品值-5，码力值-2，好感度-10，心情值-5`);
                             showMainMenu();
                         });
                     }
@@ -806,6 +972,7 @@
                 gameState.ML -= (activity === "写游戏" ? 2 : -3);
                 gameState.XQ += 2;
                 typeText(`你真幸运，没被friendi发现！\n人品值-5，码力值${activity === "写游戏" ? "+3" : "-2"}，心情+2`, () => {
+                    addHistoryEntry(`你真幸运，没被friendi发现！\n人品值-5，码力值${activity === "写游戏" ? "+3" : "-2"}，心情+2`);
                     showMainMenu();
                 });
             }
@@ -818,11 +985,13 @@
             
             if (isEasy) {
                 typeText("今天的模拟赛好简单啊！so easy!\n你用了一半的时间就答完了题，AK!!\n你想在剩下的一半时间做什么？", () => {
+                    addHistoryEntry("今天的模拟赛好简单啊！so easy!\n你用了一半的时间就答完了题，AK!!\n你想在剩下的一半时间做什么？");
                     clearOptions();
                     addOption("刷题", () => {
                         const foundProblem = Math.random() < 0.5;
                         if (foundProblem) {
                             typeText("啊啊..遇到难题！怎么办？", () => {
+                                addHistoryEntry("啊啊..遇到难题！怎么办？");
                                 clearOptions();
                                 addOption("在网上找代码", () => {
                                     const caught = Math.random() < 0.75;
@@ -831,12 +1000,14 @@
                                         gameState.RP -= 10;
                                         gameState.XQ -= 10;
                                         typeText("Oh，No...有人拍了拍你的肩膀\n你下意识地把网页关掉，回头去，一看........\nfriendi\nfriendi狠狠地批了你一顿！\n好感度-10，人品值-10，心情-10", () => {
+                                            addHistoryEntry("Oh，No...有人拍了拍你的肩膀\n你下意识地把网页关掉，回头去，一看........\nfriendi\nfriendi狠狠地批了你一顿！\n好感度-10，人品值-10，心情-10");
                                             showMainMenu();
                                         });
                                     } else {
                                         gameState.RP -= 5;
                                         gameState.XQ += 2;
                                         typeText("你真幸运，没被老师发现！\n人品值-5，心情+2", () => {
+                                            addHistoryEntry("你真幸运，没被老师发现！\n人品值-5，心情+2");
                                             showMainMenu();
                                         });
                                     }
@@ -848,6 +1019,7 @@
                                     gameState.XQ += 5;
                                     gameState.ML += 5;
                                     typeText("friendi走了进来，看到你在认真思考，摸了摸你的小脑袋\n好感度+10，人品值+10，心情+5，码力值+5", () => {
+                                        addHistoryEntry("friendi走了进来，看到你在认真思考，摸了摸你的小脑袋\n好感度+10，人品值+10，心情+5，码力值+5");
                                         showMainMenu();
                                     });
                                     updateUI();
@@ -859,6 +1031,7 @@
                             gameState.XQ += 5;
                             gameState.ML += 5;
                             typeText("题真简单...\n正在狂敲代码！突然，friendi走了进来，看到了你在敲代码，摸了摸你的小脑袋\n好感度+10，人品值+10，心情+5，码力值+5", () => {
+                                addHistoryEntry("题真简单...\n正在狂敲代码！突然，friendi走了进来，看到了你在敲代码，摸了摸你的小脑袋\n好感度+10，人品值+10，心情+5，码力值+5");
                                 showMainMenu();
                             });
                             updateUI();
@@ -871,12 +1044,14 @@
                             gameState.XQ -= 2;
                             gameState.HG -= 5;
                             typeText("friendi走了进来，看到你在大睡，十分生气，狠狠地批了你一顿！\n人品值-5，心情-2，好感度-5", () => {
+                                addHistoryEntry("friendi走了进来，看到你在大睡，十分生气，狠狠地批了你一顿！\n人品值-5，心情-2，好感度-5");
                                 showMainMenu();
                             });
                         } else {
                             gameState.RP -= 5;
                             gameState.XQ += 2;
                             typeText("你真幸运，没被老师发现！\n人品值-5，心情+2", () => {
+                                addHistoryEntry("你真幸运，没被老师发现！\n人品值-5，心情+2");
                                 showMainMenu();
                             });
                         }
@@ -901,10 +1076,7 @@
                                                                                 typeText("friendi的眼睛里闪烁着寒光,仿佛在说,否则会有怎样的后果.", () => {
                                                                                     typeText(`"好的老师!"`, () => {
                                                                                         typeText("你转身跑回教室,教室里一如既往地亮着灯,admin正在慢悠悠地讲着费用流......", () => {
-                                                                                            gameState.RP -= 5;
-                                                                                            gameState.XQ -= 2;
-                                                                                            gameState.HG -= 5;
-                                                                                            updateUI();
+                                                                                            addHistoryEntry("你打游戏被friendi发现，经过一番教育后被给予一次机会");
                                                                                             showMainMenu();
                                                                                         });
                                                                                     });
@@ -926,6 +1098,7 @@
                             gameState.RP -= 5;
                             gameState.XQ += 2;
                             typeText("你真幸运，没被老师发现！\n人品值-5，心情+2", () => {
+                                addHistoryEntry("你真幸运，没被老师发现！\n人品值-5，心情+2");
                                 showMainMenu();
                             });
                             updateUI();
@@ -936,6 +1109,7 @@
                 gameState.XQ -= 2;
                 gameState.ML += 2;
                 typeText("今天的模拟赛好难啊！！\n噼里啪啦噼里啪啦....\n铃铃铃...\n在响铃的一刻，交上了代码！\n心情-2，码力值+2", () => {
+                    addHistoryEntry("今天的模拟赛好难啊！！\n噼里啪啦噼里啪啦....\n铃铃铃...\n在响铃的一刻，交上了代码！\n心情-2，码力值+2");
                     showMainMenu();
                 });
                 updateUI();
@@ -948,6 +1122,7 @@
             
             if (!hasMonisai) {
                 typeText("今日没有模拟赛..", () => {
+                    addHistoryEntry("今日没有模拟赛..");
                     showMainMenu();
                 });
             } else {
@@ -959,6 +1134,7 @@
         function checkJixun() {
             if (gameState.Day % 30 !== 10) {
                 typeText("最近无集训", () => {
+                    addHistoryEntry("最近无集训");
                     showMainMenu();
                 });
             } else {
@@ -973,6 +1149,7 @@
             if (jxml >= 100) jxml *= 0.8;
             
             typeText(`本次集训为 ${jxt} 天，训后可增加码力值 ${Math.round(jxml)} 哦,报名吗?`, () => {
+                addHistoryEntry(`本次集训为 ${jxt} 天，训后可增加码力值 ${Math.round(jxml)} 哦,报名吗?`);
                 clearOptions();
                 addOption("报名", () => {
                     gameState.Day += jxt;
@@ -980,6 +1157,7 @@
                     gameState.XQ -= 10;
                     updateUI();
                     typeText(`集训完成，你感觉自己更NB了。增加了${Math.round(jxml)}码力值。`, () => {
+                        addHistoryEntry(`集训完成，你感觉自己更NB了。增加了${Math.round(jxml)}码力值。`);
                         showMainMenu();
                     });
                 });
@@ -993,10 +1171,12 @@
         function checkNOIP() {
             if (gameState.Day % 3 !== 2) {
                 typeText("今日没有NOIP比赛", () => {
+                    addHistoryEntry("今日没有NOIP比赛");
                     showMainMenu();
                 });
             } else if (gameState.ML <= 60) {
                 typeText("码力值不足....", () => {
+                    addHistoryEntry("码力值不足....");
                     showMainMenu();
                 });
             } else {
@@ -1009,6 +1189,7 @@
             let fenshu = 0;
             
             typeText("正在前往考场......\n欢迎进入考试现场----NOIP\n请问你要先做哪题？", () => {
+                addHistoryEntry("正在前往考场......\n欢迎进入考试现场----NOIP\n请问你要先做哪题？");
                 clearOptions();
                 addOption("第1题", () => handleNOIPQuestion(1, fenshu));
                 addOption("第2题", () => handleNOIPQuestion(2, fenshu));
@@ -1137,6 +1318,7 @@
                     gameState.XQ -= 5;
                     updateUI();
                     typeText("这么简单的题都不会，你骗我……\n这道题，你没得分\n码力值-3，人品值-10，心情-5", () => {
+                        addHistoryEntry("这么简单的题都不会，你骗我……\n这道题，你没得分\n码力值-3，人品值-10，心情-5");
                         showNOIPResult(fenshu);
                     });
                 }
@@ -1146,6 +1328,7 @@
         // 显示NOIP结果
         function showNOIPResult(fenshu) {
             typeText(`\n总分：${fenshu}`, () => {
+                addHistoryEntry(`NOIP比赛总分：${fenshu}`);
                 if (fenshu === 0) {
                     baoling();
                 } else if (fenshu <= 120) {
@@ -1154,6 +1337,7 @@
                     gameState.XQ -= 2;
                     updateUI();
                     typeText("你得了三等奖\n人品值-2，码力值+5，心情-2", () => {
+                        addHistoryEntry("你得了三等奖\n人品值-2，码力值+5，心情-2");
                         showMainMenu();
                     });
                 } else if (fenshu <= 190) {
@@ -1162,6 +1346,7 @@
                     gameState.XQ += 2;
                     updateUI();
                     typeText("你获得了二等奖\n人品值-4，码力值+10，心情+2", () => {
+                        addHistoryEntry("你获得了二等奖\n人品值-4，码力值+10，心情+2");
                         showMainMenu();
                     });
                 } else {
@@ -1170,6 +1355,7 @@
                     gameState.XQ += 10;
                     updateUI();
                     typeText("你获得了一等奖\n人品值+1，码力值+20，心情+10", () => {
+                        addHistoryEntry("你获得了一等奖\n人品值+1，码力值+20，心情+10");
                         showMainMenu();
                     });
                 }
@@ -1212,6 +1398,7 @@
                                                                                             typeText(`你回到家里，闭着眼睛关闭有分数的网页——你实在不想再看一遍刺眼的"${gameState.name}——0分"。`, () => {
                                                                                                 typeText("光线正不可挽回地消逝，一派荒凉。", () => {
                                                                                                     typeText("人品值-4，码力值+0，心情-10", () => {
+                                                                                                        addHistoryEntry("NOIP比赛爆零了，人品值-4，码力值+0，心情-10");
                                                                                                         gameState.RP -= 4;
                                                                                                         gameState.XQ -= 10;
                                                                                                         updateUI();
@@ -1245,10 +1432,12 @@
         function checkNOI() {
             if (gameState.Day % 5 !== 2) {
                 typeText("今日没有NOI比赛", () => {
+                    addHistoryEntry("今日没有NOI比赛");
                     showMainMenu();
                 });
             } else if (gameState.ML <= 150) {
                 typeText("码力值不足....", () => {
+                    addHistoryEntry("码力值不足....");
                     showMainMenu();
                 });
             } else {
@@ -1262,8 +1451,10 @@
             const isEasy = Math.random() < 0.33; // 1/3概率简单
             
             typeText("正在前往考场......\n欢迎进入考试现场----NOI", () => {
+                addHistoryEntry("正在前往考场......\n欢迎进入考试现场----NOI");
                 if (isEasy) {
                     typeText("今天的NOI好简单啊！so easy!(共三道题)", () => {
+                        addHistoryEntry("今天的NOI好简单啊！so easy!(共三道题)");
                         if (gameState.ML <= 200) {
                             fenshu += Math.floor(Math.random() * 100) + 50;
                         } else if (gameState.ML <= 300) {
@@ -1273,16 +1464,19 @@
                         }
                         
                         typeText(`你用了一半的时间就答完了题！（结果最终打了${fenshu}分）\n你想在剩下的一半时间做什么？`, () => {
+                            addHistoryEntry(`你用了一半的时间就答完了题！（结果最终打了${fenshu}分）\n你想在剩下的一半时间做什么？`);
                             clearOptions();
                             addOption("睡觉", () => handleNOIFreeTime(fenshu, "sleep"));
                             addOption("打游戏", () => handleNOIFreeTime(fenshu, "game"));
                             addOption("闲待着", () => {
                                 typeText("你无聊地度过了剩下的时间。", () => {
+                                    addHistoryEntry("你无聊地度过了剩下的时间。");
                                     showNOIResult(fenshu);
                                 });
                             });
                             addOption("离开考场", () => {
                                 typeText("你提前离开了考场。", () => {
+                                    addHistoryEntry("你提前离开了考场。");
                                     showNOIResult(fenshu);
                                 });
                             });
@@ -1296,6 +1490,7 @@
                     
                     typeText("今天的NOI好难啊！！\n噼里啪啦噼里啪啦....\n铃铃铃...", () => {
                         typeText(`在响铃的一刻，交上了代码！得了${fenshu}分\n心情-2，码力值+2`, () => {
+                            addHistoryEntry(`在响铃的一刻，交上了代码！得了${fenshu}分\n心情-2，码力值+2`);
                             gameState.XQ -= 2;
                             gameState.ML += 2;
                             updateUI();
@@ -1314,6 +1509,7 @@
                 gameState.RP -= 5;
                 gameState.XQ -= 2;
                 typeText(`考官走了进来，看到你在${activity === "sleep" ? "大睡" : "玩游戏"}，十分生气，把你请出了考场！\n人品值-5，心情-2`, () => {
+                    addHistoryEntry(`考官走了进来，看到你在${activity === "sleep" ? "大睡" : "玩游戏"}，十分生气，把你请出了考场！\n人品值-5，心情-2`);
                     updateUI();
                     showMainMenu();
                 });
@@ -1321,6 +1517,7 @@
                 gameState.RP -= 5;
                 gameState.XQ += 2;
                 typeText("你真幸运，没被考官发现！\n人品值-5，心情+2", () => {
+                    addHistoryEntry("你真幸运，没被考官发现！\n人品值-5，心情+2");
                     updateUI();
                     showNOIResult(fenshu);
                 });
@@ -1331,15 +1528,18 @@
         function handleNOIModify(fenshu) {
             if (gameState.ML >= 320) {
                 typeText("你又提高了10分，真棒！", () => {
+                    addHistoryEntry("你又提高了10分，真棒！");
                     fenshu += 10;
                     showNOIResult(fenshu);
                 });
             } else if (gameState.ML >= 250) {
                 typeText("你啥也没改", () => {
+                    addHistoryEntry("你啥也没改");
                     showNOIResult(fenshu);
                 });
             } else {
                 typeText("你又把原来对的题改错了，真垃圾！", () => {
+                    addHistoryEntry("你又把原来对的题改错了，真垃圾！");
                     fenshu -= 10;
                     showNOIResult(fenshu);
                 });
@@ -1349,38 +1549,43 @@
         // 显示NOI结果
         function showNOIResult(fenshu) {
             typeText(`\n总分：${fenshu}`, () => {
+                addHistoryEntry(`NOI比赛总分：${fenshu}`);
                 if (fenshu === 0) {
                     baoling();
                 } else if (fenshu <= 100) {
                     gameState.RP -= 2;
-                    gameState.ML += 5;
-                    gameState.XQ -= 2;
+                    gameState.ML += 10;
+                    gameState.XQ += 1;
                     updateUI();
-                    typeText("你得了铜牌\n人品值-2，码力值+5，心情-2", () => {
+                    typeText("你得了铜牌\n人品值-2，码力值+10，心情+1", () => {
+                        addHistoryEntry("你得了铜牌\n人品值-2，码力值+10，心情+1");
                         showMainMenu();
                     });
                 } else if (fenshu <= 200) {
                     gameState.RP -= 4;
-                    gameState.ML += 10;
-                    gameState.XQ += 2;
+                    gameState.ML += 20;
+                    gameState.XQ += 5;
                     updateUI();
-                    typeText("你获得了银牌\n人品值-4，码力值+10，心情+2", () => {
+                    typeText("你获得了银牌\n人品值-4，码力值+20，心情+5", () => {
+                        addHistoryEntry("你获得了银牌\n人品值-4，码力值+20，心情+5");
                         showMainMenu();
                     });
                 } else if (fenshu < 300) {
                     gameState.RP += 1;
-                    gameState.ML += 20;
-                    gameState.XQ += 10;
+                    gameState.ML += 30;
+                    gameState.XQ += 20;
                     updateUI();
-                    typeText("你获得了金牌\n人品值+1，码力值+20，心情+10", () => {
+                    typeText("你获得了金牌\n人品值+1，码力值+30，心情+20", () => {
+                        addHistoryEntry("你获得了金牌\n人品值+1，码力值+30，心情+20");
                         showMainMenu();
                     });
                 } else if (fenshu === 300) {
                     gameState.RP += 5;
-                    gameState.ML += 30;
-                    gameState.XQ += 20;
+                    gameState.ML += 35;
+                    gameState.XQ += 40;
                     updateUI();
-                    typeText("你AK了,第一名\n人品值+5，码力值+30，心情+20", () => {
+                    typeText("你AK了,第一名\n人品值+5，码力值+35，心情+40", () => {
+                        addHistoryEntry("你AK了,第一名\n人品值+5，码力值+35，心情+40");
                         showMainMenu();
                     });
                 }
@@ -1391,10 +1596,12 @@
         function checkIOI() {
             if (gameState.Day % 10 !== 4) {
                 typeText("今日没有IOI比赛", () => {
+                    addHistoryEntry("今日没有IOI比赛");
                     showMainMenu();
                 });
             } else if (gameState.ML <= 300) {
                 typeText("码力值不足....", () => {
+                    addHistoryEntry("码力值不足....");
                     showMainMenu();
                 });
             } else {
@@ -1407,6 +1614,7 @@
             let fenshu = 0;
             
             typeText("正在前往考场......\n欢迎进入考试现场----IOI\n你想做第几题？(共三道题)", () => {
+                addHistoryEntry("正在前往考场......\n欢迎进入考试现场----IOI\n你想做第几题？(共三道题)");
                 clearOptions();
                 addOption("第1题", () => handleIOIQuestion(1, fenshu));
                 addOption("第2题", () => handleIOIQuestion(2, fenshu));
@@ -1498,6 +1706,7 @@
                                 gameState.RP -= 5;
                                 gameState.XQ += 2;
                                 typeText("你真幸运，没被考官发现！\n人品值-5，心情+2", () => {
+                                    addHistoryEntry("你真幸运，没被考官发现！\n人品值-5，心情+2");
                                     updateUI();
                                     showIOIResult(fenshu);
                                 });
@@ -1505,6 +1714,7 @@
                                 gameState.RP -= 5;
                                 gameState.XQ -= 2;
                                 typeText("考官走了进来，看到你在玩游戏，十分生气，把你请出考场！\n人品值-5，心情-2", () => {
+                                    addHistoryEntry("考官走了进来，看到你在玩游戏，十分生气，把你请出考场！\n人品值-5，心情-2");
                                     updateUI();
                                     showMainMenu();
                                 });
@@ -1512,6 +1722,7 @@
                         });
                         addOption("干坐着", () => {
                             typeText("你无聊地度过了剩下的时间。", () => {
+                                addHistoryEntry("你无聊地度过了剩下的时间。");
                                 showIOIResult(fenshu);
                             });
                         });
@@ -1523,6 +1734,7 @@
         // 显示IOI结果
         function showIOIResult(fenshu) {
             typeText(`\n总分：${fenshu}分`, () => {
+                addHistoryEntry(`IOI比赛总分：${fenshu}分`);
                 if (fenshu === 0) {
                     baoling();
                 } else if (fenshu <= 100) {
@@ -1531,6 +1743,7 @@
                     gameState.XQ += 1;
                     updateUI();
                     typeText("你得了铜牌\n人品值-2，码力值+10，心情+1", () => {
+                        addHistoryEntry("你得了铜牌\n人品值-2，码力值+10，心情+1");
                         showMainMenu();
                     });
                 } else if (fenshu <= 200) {
@@ -1539,6 +1752,7 @@
                     gameState.XQ += 5;
                     updateUI();
                     typeText("你获得了银牌\n人品值-4，码力值+20，心情+5", () => {
+                        addHistoryEntry("你获得了银牌\n人品值-4，码力值+20，心情+5");
                         showMainMenu();
                     });
                 } else if (fenshu < 300) {
@@ -1547,6 +1761,7 @@
                     gameState.XQ += 20;
                     updateUI();
                     typeText("你获得了金牌\n人品值+1，码力值+30，心情+20", () => {
+                        addHistoryEntry("你获得了金牌\n人品值+1，码力值+30，心情+20");
                         showMainMenu();
                     });
                 } else if (fenshu === 300) {
@@ -1555,6 +1770,7 @@
                     gameState.XQ += 40;
                     updateUI();
                     typeText("你AK了,第一名\n人品值+5，码力值+35，心情+40", () => {
+                        addHistoryEntry("你AK了,第一名\n人品值+5，码力值+35，心情+40");
                         showMainMenu();
                     });
                 }
@@ -1564,6 +1780,7 @@
         // 打开网页
         function openfile() {
             typeText("请问你要打开什么？", () => {
+                addHistoryEntry("请问你要打开什么？");
                 clearOptions();
                 addOption("百度", () => {
                     window.open("https://www.baidu.com", "_blank");
@@ -1610,6 +1827,7 @@
         // 事件监听
         elements.newGameBtn.addEventListener('click', showNewGameModal);
         elements.saveLoadBtn.addEventListener('click', showSaveLoadModal);
+        elements.historyBtn.addEventListener('click', showHistoryModal);
         elements.confirmNewGame.addEventListener('click', () => {
             const name = elements.nameInput.value.trim();
             if (name) {
@@ -1632,6 +1850,8 @@
             }
         });
         elements.closeSaveLoad.addEventListener('click', hideSaveLoadModal);
+        elements.closeHistory.addEventListener('click', hideHistoryModal);
+        elements.clearHistory.addEventListener('click', clearHistory);
 
         // 初始化游戏
         initGame();
