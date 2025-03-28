@@ -126,6 +126,7 @@
             margin-bottom: 10px;
             border-bottom: 1px solid #eee;
             padding-bottom: 10px;
+            white-space: pre-wrap; /* 修复换行问题 */
         }
 
         .options {
@@ -140,6 +141,13 @@
             padding: 12px;
             text-align: center;
             border-radius: 10px;
+            /*pointer-events: none;  初始禁用点击 */
+            opacity: 0.5; /* 初始半透明 */
+        }
+
+        .option-btn.active {
+            pointer-events: auto; /* 启用点击 */
+            opacity: 1; /* 完全不透明 */
         }
 
         .modal {
@@ -329,7 +337,9 @@
             // 添加版本控制
             version: "1.2",
             // 历史记录
-            history: []
+            history: [],
+            // 标记是否是新的一天
+            isNewDay: false
         };
 
         // DOM元素
@@ -413,7 +423,7 @@
             }
             
             // 检查必需字段
-            const requiredFields = ['RP', 'ML', 'HG', 'XQ', 'JB', 'Day', 'name', 'isCheatMode', 'history'];
+            const requiredFields = ['RP', 'ML', 'HG', 'XQ', 'JB', 'Day', 'name', 'isCheatMode', 'history', 'isNewDay'];
             for (const field of requiredFields) {
                 if (!(field in data)) {
                     console.warn(`缺少必需字段: ${field}`);
@@ -511,13 +521,25 @@
                     if (decrypted && validateData(decrypted)) {
                         Object.assign(gameState, decrypted);
                         updateUI();
-                        showMainMenu();
+                        
+                        // 如果是加载的游戏，重置isNewDay标志
+                        gameState.isNewDay = false;
+                        
+                        // 根据当前状态决定显示什么
+                        if (gameState.name) {
+                            showMainMenu();
+                        } else {
+                            showNewGameModal();
+                        }
                         return;
                     }
                 } catch (e) {
                     console.error("加载存档失败:", e);
                 }
             }
+            
+            // 新游戏时重置isNewDay标志
+            gameState.isNewDay = false;
             showNewGameModal();
         }
 
@@ -567,6 +589,7 @@
             gameState.Day = 0;
             gameState.isCheatMode = false;
             gameState.history = [];
+            gameState.isNewDay = false;
             
             // 检查是否是作弊模式
             const cheatNames = ["王平", "wangping", "Aranea", "晨曦", "yangmo", "杨默", "HuZHUNZHUN"];
@@ -705,7 +728,7 @@
             elements.hgValue.textContent = gameState.HG;
             elements.hgBar.style.width = `${Math.min(100, gameState.HG / gameState.ML * 100.0)}%`;
             elements.xqValue.textContent = gameState.XQ;
-            elements.xqBar.style.width = `${Math.min(100, gameState.XQ)}%`;
+            elements.xqBar.style.width = `${Math.min(100, gameState.XQ / gameState.ML * 100.0)}%`;
             elements.dayValue.textContent = gameState.Day;
             elements.jbValue.textContent = gameState.JB;
         }
@@ -715,12 +738,19 @@
             let i = 0;
             elements.content.innerHTML = '';
             
+            // 禁用所有选项按钮
+            disableOptions();
+            
+            // 使用requestAnimationFrame来确保动画流畅
             function typing() {
                 if (i < text.length) {
-                    elements.content.innerHTML += text.charAt(i);
+                    // 使用pre-wrap保留换行符
+                    elements.content.innerHTML += text.charAt(i) === '\n' ? '<br>' : text.charAt(i);
                     i++;
-                    setTimeout(typing, 35);
+                    requestAnimationFrame(typing);
                 } else if (callback) {
+                    // 启用所有选项按钮
+                    enableOptions();
                     callback();
                 }
             }
@@ -733,8 +763,32 @@
             const btn = document.createElement('button');
             btn.className = 'option-btn';
             btn.textContent = text;
-            btn.addEventListener('click', callback);
+            
+            // 使用一次性事件监听器防止多次点击
+            const handler = () => {
+                // 先禁用所有选项按钮
+                disableOptions();
+                callback();
+            };
+            
+            btn.addEventListener('click', handler, {once: true});
             elements.options.appendChild(btn);
+        }
+
+        // 禁用所有选项按钮
+        function disableOptions() {
+            const buttons = elements.options.querySelectorAll('.option-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+        }
+
+        // 启用所有选项按钮
+        function enableOptions() {
+            const buttons = elements.options.querySelectorAll('.option-btn');
+            buttons.forEach(btn => {
+                btn.classList.add('active');
+            });
         }
 
         // 清除所有选项
@@ -746,9 +800,12 @@
         function showMainMenu() {
             if (checkGameOver()) return;
             
-            // 更新天数并检查级别提升
-            gameState.Day++;
-            checkLevelUp();
+            // 只有在isNewDay为false时才增加天数
+            if (!gameState.isNewDay) {
+                gameState.Day++;
+                gameState.isNewDay = true; // 标记今天已经增加过天数
+                checkLevelUp();
+            }
             
             typeText(`第 ${gameState.Day} 天，请问你要做什么？`, () => {
                 addHistoryEntry(`第 ${gameState.Day} 天，请问你要做什么？`);
@@ -766,6 +823,8 @@
                     updateUI();
                     typeText("在家颓废了一天，码力值-10，心情+10，人品值-10", () => {
                         addHistoryEntry("在家颓废了一天，码力值-10，心情+10，人品值-10");
+                        // 重置isNewDay标志，以便下次可以增加天数
+                        gameState.isNewDay = false;
                         showMainMenu();
                     });
                 });
@@ -835,6 +894,8 @@
                                 updateUI();
                                 typeText("friendi表扬你是一个知错就改的好OIER\n人品值+5，好感度+5，心情值+5", () => {
                                     addHistoryEntry("friendi表扬你是一个知错就改的好OIER\n人品值+5，好感度+5，心情值+5");
+                                    // 重置isNewDay标志，以便下次可以增加天数
+                                    gameState.isNewDay = false;
                                     handleMonisai();
                                 });
                             });
@@ -846,6 +907,8 @@
                                     gameState.XQ -= 5;
                                     typeText("你被friendi碰了个正着，friendi狠狠地批了你一顿！\n人品值-5，好感度-5，心情值-5", () => {
                                         addHistoryEntry("你被friendi碰了个正着，friendi狠狠地批了你一顿！\n人品值-5，好感度-5，心情值-5");
+                                        // 重置isNewDay标志，以便下次可以增加天数
+                                        gameState.isNewDay = false;
                                         handleMonisai();
                                     });
                                 } else {
@@ -853,6 +916,8 @@
                                     gameState.XQ += 2;
                                     typeText("你竟然没遇到friendi！\n你溜回了座位，沾沾自喜起来！\n人品值-5，心情值+2", () => {
                                         addHistoryEntry("你竟然没遇到friendi！\n你溜回了座位，沾沾自喜起来！\n人品值-5，心情值+2");
+                                        // 重置isNewDay标志，以便下次可以增加天数
+                                        gameState.isNewDay = false;
                                         handleMonisai();
                                     });
                                 }
@@ -876,6 +941,8 @@
                         updateUI();
                         typeText("你认认真真的听完了课，感觉自已更NB了！\n人品值+5，码力值+5，好感度+2，心情值-2", () => {
                             addHistoryEntry("你认认真真的听完了课，感觉自已更NB了！\n人品值+5，码力值+5，好感度+2，心情值-2");
+                            // 重置isNewDay标志，以便下次可以增加天数
+                            gameState.isNewDay = false;
                             showMainMenu();
                         });
                     });
@@ -907,6 +974,8 @@
                         gameState.XQ += 5;
                         typeText("friendi以为你正在做题，所以摸了摸你的小脑袋\n人品值-5，码力值+3，好感度+1，心情值+5", () => {
                             addHistoryEntry("friendi以为你正在做题，所以摸了摸你的小脑袋\n人品值-5，码力值+3，好感度+1，心情值+5");
+                            // 重置isNewDay标志，以便下次可以增加天数
+                            gameState.isNewDay = false;
                             showMainMenu();
                         });
                     } else {
@@ -916,6 +985,8 @@
                         gameState.XQ -= 4;
                         typeText("friendi看出了你正在写游戏的代码\n于是，friendi十分生气，把你批了一顿！\n人品值-5，码力值+3，好感度-5，心情值-4", () => {
                             addHistoryEntry("friendi看出了你正在写游戏的代码\n于是，friendi十分生气，把你批了一顿！\n人品值-5，码力值+3，好感度-5，心情值-4");
+                            // 重置isNewDay标志，以便下次可以增加天数
+                            gameState.isNewDay = false;
                             showMainMenu();
                         });
                     }
@@ -943,6 +1014,8 @@
                                                                                 typeText(`"好的老师!"`, () => {
                                                                                     typeText("你转身跑回教室,教室里一如既往地亮着灯,admin正在慢悠悠地讲着费用流......", () => {
                                                                                         addHistoryEntry("你打游戏被friendi发现，经过一番教育后被给予一次机会");
+                                                                                        // 重置isNewDay标志，以便下次可以增加天数
+                                                                                        gameState.isNewDay = false;
                                                                                         showMainMenu();
                                                                                     });
                                                                                 });
@@ -963,6 +1036,8 @@
                     } else {
                         typeText(`Oh，No...有人拍了拍你的肩膀\n你下意识地把${activity === "小说" ? "书合上" : "网页关掉"}，回头去，一看........\nfriendi\n"你不许在讲课时看${activity}！"\n你吓死了（暗中哭泣）\n人品值-5，码力值-2，好感度-10，心情值-5`, () => {
                             addHistoryEntry(`Oh，No...有人拍了拍你的肩膀\n你下意识地把${activity === "小说" ? "书合上" : "网页关掉"}，回头去，一看........\nfriendi\n"你不许在讲课时看${activity}！"\n你吓死了（暗中哭泣）\n人品值-5，码力值-2，好感度-10，心情值-5`);
+                            // 重置isNewDay标志，以便下次可以增加天数
+                            gameState.isNewDay = false;
                             showMainMenu();
                         });
                     }
@@ -973,6 +1048,8 @@
                 gameState.XQ += 2;
                 typeText(`你真幸运，没被friendi发现！\n人品值-5，码力值${activity === "写游戏" ? "+3" : "-2"}，心情+2`, () => {
                     addHistoryEntry(`你真幸运，没被friendi发现！\n人品值-5，码力值${activity === "写游戏" ? "+3" : "-2"}，心情+2`);
+                    // 重置isNewDay标志，以便下次可以增加天数
+                    gameState.isNewDay = false;
                     showMainMenu();
                 });
             }
@@ -1001,6 +1078,8 @@
                                         gameState.XQ -= 10;
                                         typeText("Oh，No...有人拍了拍你的肩膀\n你下意识地把网页关掉，回头去，一看........\nfriendi\nfriendi狠狠地批了你一顿！\n好感度-10，人品值-10，心情-10", () => {
                                             addHistoryEntry("Oh，No...有人拍了拍你的肩膀\n你下意识地把网页关掉，回头去，一看........\nfriendi\nfriendi狠狠地批了你一顿！\n好感度-10，人品值-10，心情-10");
+                                            // 重置isNewDay标志，以便下次可以增加天数
+                                            gameState.isNewDay = false;
                                             showMainMenu();
                                         });
                                     } else {
@@ -1008,6 +1087,8 @@
                                         gameState.XQ += 2;
                                         typeText("你真幸运，没被老师发现！\n人品值-5，心情+2", () => {
                                             addHistoryEntry("你真幸运，没被老师发现！\n人品值-5，心情+2");
+                                            // 重置isNewDay标志，以便下次可以增加天数
+                                            gameState.isNewDay = false;
                                             showMainMenu();
                                         });
                                     }
@@ -1020,6 +1101,8 @@
                                     gameState.ML += 5;
                                     typeText("friendi走了进来，看到你在认真思考，摸了摸你的小脑袋\n好感度+10，人品值+10，心情+5，码力值+5", () => {
                                         addHistoryEntry("friendi走了进来，看到你在认真思考，摸了摸你的小脑袋\n好感度+10，人品值+10，心情+5，码力值+5");
+                                        // 重置isNewDay标志，以便下次可以增加天数
+                                        gameState.isNewDay = false;
                                         showMainMenu();
                                     });
                                     updateUI();
@@ -1032,6 +1115,8 @@
                             gameState.ML += 5;
                             typeText("题真简单...\n正在狂敲代码！突然，friendi走了进来，看到了你在敲代码，摸了摸你的小脑袋\n好感度+10，人品值+10，心情+5，码力值+5", () => {
                                 addHistoryEntry("题真简单...\n正在狂敲代码！突然，friendi走了进来，看到了你在敲代码，摸了摸你的小脑袋\n好感度+10，人品值+10，心情+5，码力值+5");
+                                // 重置isNewDay标志，以便下次可以增加天数
+                                gameState.isNewDay = false;
                                 showMainMenu();
                             });
                             updateUI();
@@ -1045,6 +1130,8 @@
                             gameState.HG -= 5;
                             typeText("friendi走了进来，看到你在大睡，十分生气，狠狠地批了你一顿！\n人品值-5，心情-2，好感度-5", () => {
                                 addHistoryEntry("friendi走了进来，看到你在大睡，十分生气，狠狠地批了你一顿！\n人品值-5，心情-2，好感度-5");
+                                // 重置isNewDay标志，以便下次可以增加天数
+                                gameState.isNewDay = false;
                                 showMainMenu();
                             });
                         } else {
@@ -1052,6 +1139,8 @@
                             gameState.XQ += 2;
                             typeText("你真幸运，没被老师发现！\n人品值-5，心情+2", () => {
                                 addHistoryEntry("你真幸运，没被老师发现！\n人品值-5，心情+2");
+                                // 重置isNewDay标志，以便下次可以增加天数
+                                gameState.isNewDay = false;
                                 showMainMenu();
                             });
                         }
@@ -1077,6 +1166,8 @@
                                                                                     typeText(`"好的老师!"`, () => {
                                                                                         typeText("你转身跑回教室,教室里一如既往地亮着灯,admin正在慢悠悠地讲着费用流......", () => {
                                                                                             addHistoryEntry("你打游戏被friendi发现，经过一番教育后被给予一次机会");
+                                                                                            // 重置isNewDay标志，以便下次可以增加天数
+                                                                                            gameState.isNewDay = false;
                                                                                             showMainMenu();
                                                                                         });
                                                                                     });
@@ -1099,6 +1190,8 @@
                             gameState.XQ += 2;
                             typeText("你真幸运，没被老师发现！\n人品值-5，心情+2", () => {
                                 addHistoryEntry("你真幸运，没被老师发现！\n人品值-5，心情+2");
+                                // 重置isNewDay标志，以便下次可以增加天数
+                                gameState.isNewDay = false;
                                 showMainMenu();
                             });
                             updateUI();
@@ -1110,6 +1203,8 @@
                 gameState.ML += 2;
                 typeText("今天的模拟赛好难啊！！\n噼里啪啦噼里啪啦....\n铃铃铃...\n在响铃的一刻，交上了代码！\n心情-2，码力值+2", () => {
                     addHistoryEntry("今天的模拟赛好难啊！！\n噼里啪啦噼里啪啦....\n铃铃铃...\n在响铃的一刻，交上了代码！\n心情-2，码力值+2");
+                    // 重置isNewDay标志，以便下次可以增加天数
+                    gameState.isNewDay = false;
                     showMainMenu();
                 });
                 updateUI();
@@ -1123,6 +1218,8 @@
             if (!hasMonisai) {
                 typeText("今日没有模拟赛..", () => {
                     addHistoryEntry("今日没有模拟赛..");
+                    // 重置isNewDay标志，以便下次可以增加天数
+                    gameState.isNewDay = false;
                     showMainMenu();
                 });
             } else {
@@ -1135,6 +1232,8 @@
             if (gameState.Day % 30 !== 10) {
                 typeText("最近无集训", () => {
                     addHistoryEntry("最近无集训");
+                    // 重置isNewDay标志，以便下次可以增加天数
+                    gameState.isNewDay = false;
                     showMainMenu();
                 });
             } else {
@@ -1158,10 +1257,14 @@
                     updateUI();
                     typeText(`集训完成，你感觉自己更NB了。增加了${Math.round(jxml)}码力值。`, () => {
                         addHistoryEntry(`集训完成，你感觉自己更NB了。增加了${Math.round(jxml)}码力值。`);
+                        // 重置isNewDay标志，以便下次可以增加天数
+                        gameState.isNewDay = false;
                         showMainMenu();
                     });
                 });
                 addOption("不报名", () => {
+                    // 重置isNewDay标志，以便下次可以增加天数
+                    gameState.isNewDay = false;
                     showMainMenu();
                 });
             });
@@ -1172,11 +1275,15 @@
             if (gameState.Day % 3 !== 2) {
                 typeText("今日没有NOIP比赛", () => {
                     addHistoryEntry("今日没有NOIP比赛");
+                    // 重置isNewDay标志，以便下次可以增加天数
+                    gameState.isNewDay = false;
                     showMainMenu();
                 });
             } else if (gameState.ML <= 60) {
                 typeText("码力值不足....", () => {
                     addHistoryEntry("码力值不足....");
+                    // 重置isNewDay标志，以便下次可以增加天数
+                    gameState.isNewDay = false;
                     showMainMenu();
                 });
             } else {
@@ -1338,6 +1445,8 @@
                     updateUI();
                     typeText("你得了三等奖\n人品值-2，码力值+5，心情-2", () => {
                         addHistoryEntry("你得了三等奖\n人品值-2，码力值+5，心情-2");
+                        // 重置isNewDay标志，以便下次可以增加天数
+                        gameState.isNewDay = false;
                         showMainMenu();
                     });
                 } else if (fenshu <= 190) {
@@ -1347,6 +1456,8 @@
                     updateUI();
                     typeText("你获得了二等奖\n人品值-4，码力值+10，心情+2", () => {
                         addHistoryEntry("你获得了二等奖\n人品值-4，码力值+10，心情+2");
+                        // 重置isNewDay标志，以便下次可以增加天数
+                        gameState.isNewDay = false;
                         showMainMenu();
                     });
                 } else {
@@ -1356,6 +1467,8 @@
                     updateUI();
                     typeText("你获得了一等奖\n人品值+1，码力值+20，心情+10", () => {
                         addHistoryEntry("你获得了一等奖\n人品值+1，码力值+20，心情+10");
+                        // 重置isNewDay标志，以便下次可以增加天数
+                        gameState.isNewDay = false;
                         showMainMenu();
                     });
                 }
@@ -1402,6 +1515,8 @@
                                                                                                         gameState.RP -= 4;
                                                                                                         gameState.XQ -= 10;
                                                                                                         updateUI();
+                                                                                                        // 重置isNewDay标志，以便下次可以增加天数
+                                                                                                        gameState.isNewDay = false;
                                                                                                         showMainMenu();
                                                                                                     });
                                                                                                 });
@@ -1433,11 +1548,15 @@
             if (gameState.Day % 5 !== 2) {
                 typeText("今日没有NOI比赛", () => {
                     addHistoryEntry("今日没有NOI比赛");
+                    // 重置isNewDay标志，以便下次可以增加天数
+                    gameState.isNewDay = false;
                     showMainMenu();
                 });
             } else if (gameState.ML <= 150) {
                 typeText("码力值不足....", () => {
                     addHistoryEntry("码力值不足....");
+                    // 重置isNewDay标志，以便下次可以增加天数
+                    gameState.isNewDay = false;
                     showMainMenu();
                 });
             } else {
@@ -1511,6 +1630,8 @@
                 typeText(`考官走了进来，看到你在${activity === "sleep" ? "大睡" : "玩游戏"}，十分生气，把你请出了考场！\n人品值-5，心情-2`, () => {
                     addHistoryEntry(`考官走了进来，看到你在${activity === "sleep" ? "大睡" : "玩游戏"}，十分生气，把你请出了考场！\n人品值-5，心情-2`);
                     updateUI();
+                    // 重置isNewDay标志，以便下次可以增加天数
+                    gameState.isNewDay = false;
                     showMainMenu();
                 });
             } else {
@@ -1559,6 +1680,8 @@
                     updateUI();
                     typeText("你得了铜牌\n人品值-2，码力值+10，心情+1", () => {
                         addHistoryEntry("你得了铜牌\n人品值-2，码力值+10，心情+1");
+                        // 重置isNewDay标志，以便下次可以增加天数
+                        gameState.isNewDay = false;
                         showMainMenu();
                     });
                 } else if (fenshu <= 200) {
@@ -1568,6 +1691,8 @@
                     updateUI();
                     typeText("你获得了银牌\n人品值-4，码力值+20，心情+5", () => {
                         addHistoryEntry("你获得了银牌\n人品值-4，码力值+20，心情+5");
+                        // 重置isNewDay标志，以便下次可以增加天数
+                        gameState.isNewDay = false;
                         showMainMenu();
                     });
                 } else if (fenshu < 300) {
@@ -1577,6 +1702,8 @@
                     updateUI();
                     typeText("你获得了金牌\n人品值+1，码力值+30，心情+20", () => {
                         addHistoryEntry("你获得了金牌\n人品值+1，码力值+30，心情+20");
+                        // 重置isNewDay标志，以便下次可以增加天数
+                        gameState.isNewDay = false;
                         showMainMenu();
                     });
                 } else if (fenshu === 300) {
@@ -1586,6 +1713,8 @@
                     updateUI();
                     typeText("你AK了,第一名\n人品值+5，码力值+35，心情+40", () => {
                         addHistoryEntry("你AK了,第一名\n人品值+5，码力值+35，心情+40");
+                        // 重置isNewDay标志，以便下次可以增加天数
+                        gameState.isNewDay = false;
                         showMainMenu();
                     });
                 }
@@ -1597,11 +1726,15 @@
             if (gameState.Day % 10 !== 4) {
                 typeText("今日没有IOI比赛", () => {
                     addHistoryEntry("今日没有IOI比赛");
+                    // 重置isNewDay标志，以便下次可以增加天数
+                    gameState.isNewDay = false;
                     showMainMenu();
                 });
             } else if (gameState.ML <= 300) {
                 typeText("码力值不足....", () => {
                     addHistoryEntry("码力值不足....");
+                    // 重置isNewDay标志，以便下次可以增加天数
+                    gameState.isNewDay = false;
                     showMainMenu();
                 });
             } else {
@@ -1716,6 +1849,8 @@
                                 typeText("考官走了进来，看到你在玩游戏，十分生气，把你请出考场！\n人品值-5，心情-2", () => {
                                     addHistoryEntry("考官走了进来，看到你在玩游戏，十分生气，把你请出考场！\n人品值-5，心情-2");
                                     updateUI();
+                                    // 重置isNewDay标志，以便下次可以增加天数
+                                    gameState.isNewDay = false;
                                     showMainMenu();
                                 });
                             }
@@ -1744,6 +1879,8 @@
                     updateUI();
                     typeText("你得了铜牌\n人品值-2，码力值+10，心情+1", () => {
                         addHistoryEntry("你得了铜牌\n人品值-2，码力值+10，心情+1");
+                        // 重置isNewDay标志，以便下次可以增加天数
+                        gameState.isNewDay = false;
                         showMainMenu();
                     });
                 } else if (fenshu <= 200) {
@@ -1753,6 +1890,8 @@
                     updateUI();
                     typeText("你获得了银牌\n人品值-4，码力值+20，心情+5", () => {
                         addHistoryEntry("你获得了银牌\n人品值-4，码力值+20，心情+5");
+                        // 重置isNewDay标志，以便下次可以增加天数
+                        gameState.isNewDay = false;
                         showMainMenu();
                     });
                 } else if (fenshu < 300) {
@@ -1762,6 +1901,8 @@
                     updateUI();
                     typeText("你获得了金牌\n人品值+1，码力值+30，心情+20", () => {
                         addHistoryEntry("你获得了金牌\n人品值+1，码力值+30，心情+20");
+                        // 重置isNewDay标志，以便下次可以增加天数
+                        gameState.isNewDay = false;
                         showMainMenu();
                     });
                 } else if (fenshu === 300) {
@@ -1771,6 +1912,8 @@
                     updateUI();
                     typeText("你AK了,第一名\n人品值+5，码力值+35，心情+40", () => {
                         addHistoryEntry("你AK了,第一名\n人品值+5，码力值+35，心情+40");
+                        // 重置isNewDay标志，以便下次可以增加天数
+                        gameState.isNewDay = false;
                         showMainMenu();
                     });
                 }
@@ -1820,6 +1963,8 @@
         // 主菜单
         function zhuye() {
             if (!checkGameOver()) {
+                // 重置isNewDay标志，以便下次可以增加天数
+                gameState.isNewDay = false;
                 showMainMenu();
             }
         }
