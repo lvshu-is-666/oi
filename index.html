@@ -142,7 +142,7 @@
             text-align: center;
             border-radius: 10px;
             /*pointer-events: none;  初始禁用点击 */
-            opacity: 0.5; /* 初始半透明 */
+            /*opacity: 0.5;  初始半透明 */
         }
 
         .option-btn.active {
@@ -701,10 +701,10 @@
                 const checksum = decrypted.checksum;
                 delete decrypted.checksum;
                 
-                if (generateChecksum(decrypted) !== checksum) {
-                    alert("存档数据已被篡改！");
-                    return false;
-                }
+                //if (generateChecksum(decrypted) !== checksum) {
+                //    alert("存档数据已被篡改！");
+                //    return false;
+                //}
                 
                 Object.assign(gameState, decrypted);
                 updateUI();
@@ -722,13 +722,13 @@
         function updateUI() {
             elements.playerName.textContent = gameState.name || "未设置";
             elements.rpValue.textContent = gameState.RP;
-            elements.rpBar.style.width = `${Math.min(100, gameState.RP / gameState.ML * 100.0)}%`;
+            elements.rpBar.style.width = `${Math.min(100, gameState.RP / Math.min(100, gameState.ML) * 100.0)}%`;
             elements.mlValue.textContent = gameState.ML;
             elements.mlBar.style.width = `${Math.min(100, gameState.ML / 10.0)}%`;
             elements.hgValue.textContent = gameState.HG;
-            elements.hgBar.style.width = `${Math.min(100, gameState.HG / gameState.ML * 100.0)}%`;
+            elements.hgBar.style.width = `${Math.min(100, gameState.HG / Math.min(100, gameState.ML) * 100.0)}%`;
             elements.xqValue.textContent = gameState.XQ;
-            elements.xqBar.style.width = `${Math.min(100, gameState.XQ / gameState.ML * 100.0)}%`;
+            elements.xqBar.style.width = `${Math.min(100, gameState.XQ)}%`;
             elements.dayValue.textContent = gameState.Day;
             elements.jbValue.textContent = gameState.JB;
         }
@@ -747,7 +747,8 @@
                     // 使用pre-wrap保留换行符
                     elements.content.innerHTML += text.charAt(i) === '\n' ? '<br>' : text.charAt(i);
                     i++;
-                    requestAnimationFrame(typing);
+                    setTimeout(typing, 40);
+                    //requestAnimationFrame(typing);
                 } else if (callback) {
                     // 启用所有选项按钮
                     enableOptions();
