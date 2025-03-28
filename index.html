@@ -34,6 +34,7 @@
         .header {
             display: flex;
             justify-content: space-between;
+            flex-wrap: wrap;
             align-items: center;
             margin-bottom: 20px;
         }
@@ -41,6 +42,7 @@
         h1 {
             color: #5a2d82;
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+            align-self: center;
         }
 
         .game-controls {
@@ -251,7 +253,7 @@
             <div>
                 <h3>保存当前游戏</h3>
                 <button id="saveGameBtn" style="width: 100%; margin-bottom: 10px;">保存游戏</button>
-                <textarea id="saveData" readonly style="width: 100%; height: 100px; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px;"></textarea>
+                <textarea id="saveData" placeholder="复制数据码..." readonly style="width: 100%; height: 100px; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px;"></textarea>
             </div>
             <div>
                 <h3>加载游戏</h3>
@@ -279,7 +281,7 @@
             name: "",
             isCheatMode: false,
             // 添加版本控制
-            version: "1.0.1"
+            version: "1.1"
         };
 
         // DOM元素
@@ -365,14 +367,6 @@
                     return false;
                 }
             }
-            
-            // 检查数值范围
-            if (data.RP < -100 || data.RP > 9999) return false;
-            if (data.ML < -100 || data.ML > 9999) return false;
-            if (data.HG < -100 || data.HG > 9999) return false;
-            if (data.XQ < 0 || data.XQ > 9999) return false;
-            if (data.JB < 1 || data.JB > 9999) return false;
-            if (data.Day < 0 || data.Day > 99999999) return false;
             
             return true;
         }
@@ -556,13 +550,13 @@
         function updateUI() {
             elements.playerName.textContent = gameState.name || "未设置";
             elements.rpValue.textContent = gameState.RP;
-            elements.rpBar.style.width = `${Math.min(100, gameState.RP)}%`;
+            elements.rpBar.style.width = `${Math.min(100, gameState.RP / gameState.ML * 100.0)}%`;
             elements.mlValue.textContent = gameState.ML;
-            elements.mlBar.style.width = `${Math.min(100, gameState.ML / 10)}%`;
+            elements.mlBar.style.width = `${Math.min(100, gameState.ML / 10.0)}%`;
             elements.hgValue.textContent = gameState.HG;
-            elements.hgBar.style.width = `${Math.min(100, gameState.HG)}%`;
+            elements.hgBar.style.width = `${Math.min(100, gameState.HG / gameState.ML * 100.0)}%`;
             elements.xqValue.textContent = gameState.XQ;
-            elements.xqBar.style.width = `${Math.min(100, gameState.XQ)}%`;
+            elements.xqBar.style.width = `${Math.min(100, gameState.XQ / gameState.ML * 100.0)}%`;
             elements.dayValue.textContent = gameState.Day;
             elements.jbValue.textContent = gameState.JB;
         }
